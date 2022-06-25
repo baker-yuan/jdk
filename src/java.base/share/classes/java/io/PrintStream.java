@@ -769,7 +769,9 @@ public class PrintStream extends FilterOutputStream
      * character ({@code '\n'}).
      */
     public void println() {
+        print("---------------------------------->");
         newLine();
+        print("<----------------------------------");
     }
 
     /**

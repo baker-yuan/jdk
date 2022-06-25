@@ -361,7 +361,7 @@ vforkChild(ChildStuff *c) {
      * as suggested by the scary gcc warning:
      *  warning: variable 'foo' might be clobbered by 'longjmp' or 'vfork'
      */
-    resultPid = vfork();
+    resultPid = fork();
 
     if (resultPid == 0) {
         childProcess(c);
