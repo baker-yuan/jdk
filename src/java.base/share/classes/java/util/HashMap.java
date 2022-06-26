@@ -135,6 +135,11 @@ import jdk.internal.misc.SharedSecrets;
  * @see Hashtable
  * @since 1.2
  */
+
+/**
+ * https://zhuanlan.zhihu.com/p/459797826
+ * https://blog.csdn.net/bingshangdeqiji/article/details/105092989
+ */
 public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Cloneable, Serializable {
 
     private static final long serialVersionUID = 362498820763181265L;
@@ -246,7 +251,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     /**
      * The load factor used when none specified in constructor.
      */
-    //
+    // 默认加载因子值
     static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
     /**
@@ -278,10 +283,15 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * Basic hash bin node, used for most entries.  (See below for
      * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
      */
+    //注意：jdk1.8 HashMap中的Entry不见了，取而代之的是Node，但是Node也实现了Map.Entry接口，和之前的Entry类似。
     static class Node<K, V> implements Map.Entry<K, V> {
+        //
         final int hash;
+        //
         final K key;
+        //
         V value;
+        // 下一个节点的数据
         Node<K, V> next;
 
         Node(int hash, K key, V value, Node<K, V> next) {
@@ -344,8 +354,32 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * to incorporate impact of the highest bits that would otherwise
      * never be used in index calculations because of table bounds.
      */
+    /**
+     *
+     * @param key  当 key==null 时返回0，也就是说 key 可以设置为 null。
+     * @return 数组下标
+     */
+    // ----------------------- hashCode底层 -----------------------
+    // public int hashCode() {
+    //     return identityHashCode(this);
+    // }
+    // static int identityHashCode(Object obj) {
+    //     int lockWord = obj.shadow$_monitor_;
+    //     final int lockWordStateMask = 0xC0000000;  // Top 2 bits.
+    //     final int lockWordStateHash = 0x80000000;  // Top 2 bits are value 2 (kStateHash).
+    //     final int lockWordHashMask = 0x0FFFFFFF;  // Low 28 bits.
+    //     if ((lockWord & lockWordStateMask) == lockWordStateHash) {
+    //         return lockWord & lockWordHashMask;
+    //     }
+    //     return identityHashCodeNative(obj);
+    // }
+    // 从identityHashCode()方法看出key可以是任意类型，都可以变成int类型的hashCode。
+    // ----------------------- hashCode底层 -----------------------
+
+
     static final int hash(Object key) {
-        int h;
+        //h>>>16 >>>是无符号右移，是用来取出h的高16
+        int h; // 4字节 32位
         return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
     }
 
@@ -431,6 +465,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     // Additionally, if the table array has not been allocated, this
     // field holds the initial array capacity, or zero signifying
     // DEFAULT_INITIAL_CAPACITY.)
+    // 阈值：hashMap所能容纳的最大键值对数量，如果超过则需要扩容，计算方式：threshold=initialCapacity*loadFactor。
     int threshold;
 
     /**
@@ -438,6 +473,10 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *
      * @serial
      */
+    // 哈希表的加载因子 默认DEFAULT_LOAD_FACTOR
+    // 在默认情况下，数组大小为16，那么当HashMap中元素个数超过 16*0.75=12 的时候，
+    // 就把数组的大小扩展为 16*2=32 ，即扩大一倍，然后重新计算每个元素在数组中的位置。
+    // 当然这个值是可以自己设定的，但是不推荐修改这个值。
     final float loadFactor;
 
     /* ---------------- Public operations -------------- */
@@ -450,6 +489,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * @param loadFactor      the load factor
      * @throws IllegalArgumentException if the initial capacity is negative
      *                                  or the load factor is nonpositive
+     */
+    /**
+     *
+     * @param initialCapacity 初始容量(默认16)。
+     * @param loadFactor 加载因子(默认0.75)。
      */
     public HashMap(int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
@@ -480,6 +524,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * (16) and the default load factor (0.75).
      */
     public HashMap() {
+        // 构造一个具有默认加载因子 (0.75) 的空 HashMap。
         this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
     }
 
@@ -617,8 +662,15 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * (A {@code null} return can also indicate that the map
      * previously associated {@code null} with {@code key}.)
      */
+    /**
+     *
+     * @param key key唯一，如果key存在则覆盖value内容。key可以为null。
+     * @param value 值
+     * @return V
+     */
     public V put(K key, V value) {
-        return putVal(hash(key), key, value, false, true);
+        int hash = hash(key);
+        return putVal(hash, key, value, false, true);
     }
 
     /**
@@ -634,55 +686,82 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     /**
      * 插入元素
      *
-     * @param hash
-     * @param key
-     * @param value
-     * @param onlyIfAbsent
-     * @param evict
-     * @return
+     * @param hash         键的哈希值
+     * @param key          键
+     * @param value        要放置的值
+     * @param onlyIfAbsent 如果为真，则不要更改现有值
+     * @param evict        如果为 false，则表处于创建模式。
+     * @return 前一个值，如果没有则返回 null
      */
     final V putVal(int hash, K key, V value, boolean onlyIfAbsent, boolean evict) {
         Node<K, V>[] tab;
-        Node<K, V> p;
+        Node<K, V> p; //
         int n;
-        int i;
-        if ((tab = table) == null || (n = tab.length) == 0)
+        int i; // 下标
+
+        //判断table是否初始化
+        if ((tab = table) == null || (n = tab.length) == 0) {
+            //调用 resize() 方法，进行初始化并赋值
             n = (tab = resize()).length;
-        if ((p = tab[i = (n - 1) & hash]) == null)
+        }
+
+        //通过hash获取下标
+        if ((p = tab[i = (n - 1) & hash]) == null) {
+            //tab[i]下标没有值，创建新的Node并赋值。
             tab[i] = newNode(hash, key, value, null);
+        }
         else {
-            Node<K, V> e;
+            //tab[i] 下标的有数据，发生碰撞
+            Node<K, V> e; // 老值
             K k;
-            if (p.hash == hash &&
-                    ((k = p.key) == key || (key != null && key.equals(k))))
+            //判断tab[i]的hash值传入的hash值相当，tab[i]的的key值和传入的key值相同
+            if (p.hash == hash && ((k = p.key) == key || (key != null && key.equals(k)))) {
                 e = p;
-            else if (p instanceof TreeNode)
+            }
+            // 数据结构是红黑树
+            else if (p instanceof TreeNode) {
+                //
                 e = ((TreeNode<K, V>) p).putTreeVal(this, tab, hash, key, value);
+            }
+            // 数据结构是链表
             else {
                 for (int binCount = 0; ; ++binCount) {
+                    //p的下一个节点为null,表示p就是最后一个节点
                     if ((e = p.next) == null) {
+                        //创建Node并插入链表的尾部
                         p.next = newNode(hash, key, value, null);
-                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                        //当元素>=8-1，链表转为树(红黑树)结构
+                        if (binCount >= TREEIFY_THRESHOLD - 1) {// -1 for 1st
                             treeifyBin(tab, hash);
+                        }
                         break;
                     }
-                    if (e.hash == hash &&
-                            ((k = e.key) == key || (key != null && key.equals(k))))
+                    //如果key在链表中已经存在，则退出循环
+                    if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k)))) {
                         break;
+                    }
+                    //更新p指向下一个节点，继续遍历
                     p = e;
                 }
             }
+
+            //如果key在链表中已经存在，则修改其原先key的value值，并且返回老的value值
             if (e != null) { // existing mapping for key
                 V oldValue = e.value;
-                if (!onlyIfAbsent || oldValue == null)
+                if (!onlyIfAbsent || oldValue == null) {
                     e.value = value;
+                }
                 afterNodeAccess(e);
                 return oldValue;
             }
+
         }
-        ++modCount;
-        if (++size > threshold)
+        ++modCount; //修改次数
+        //根据map值判断是否要对map的大小扩容
+        if (++size > threshold) {
             resize();
+        }
+        //插入成功时会调用的方法(默认实现为空)
         afterNodeInsertion(evict);
         return null;
     }
