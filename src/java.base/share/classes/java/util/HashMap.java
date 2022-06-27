@@ -139,6 +139,7 @@ import jdk.internal.misc.SharedSecrets;
 /**
  * https://zhuanlan.zhihu.com/p/459797826
  * https://blog.csdn.net/bingshangdeqiji/article/details/105092989
+ * https://yuanyu.blog.csdn.net/article/details/108943511
  */
 public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Cloneable, Serializable {
 
@@ -376,6 +377,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     // 从identityHashCode()方法看出key可以是任意类型，都可以变成int类型的hashCode。
     // ----------------------- hashCode底层 -----------------------
 
+    //
     static final int hash(Object key) {
         // 步骤
         // 1、无符号位移(>>>)
@@ -424,6 +426,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
     /**
      * Returns a power of two size for the given target capacity.
+     */
+    /**
+     *
+     * @param cap 0返回1
+     * @return threshold
      */
     static final int tableSizeFor(int cap) {
         int n = -1 >>> Integer.numberOfLeadingZeros(cap - 1);

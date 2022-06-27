@@ -1616,6 +1616,12 @@ public final class Integer extends Number implements Comparable<Integer> {
      *     is equal to zero.
      * @since 1.5
      */
+    /**
+     * 给定一个int类型数据，返回这个数据的二进制串中从最左边算起连续的“0”的总数量。因为int类型的数据长度为32所以高位不足的地方会以“0”填充。
+     * @param i i
+     * @return  从最左边算起连续的“0”的总数量
+     */
+    // https://www.jianshu.com/p/4ec7a57bef03
     @HotSpotIntrinsicCandidate
     public static int numberOfLeadingZeros(int i) {
         // HD, Count leading 0's
