@@ -140,6 +140,7 @@ import jdk.internal.misc.SharedSecrets;
  * https://zhuanlan.zhihu.com/p/459797826
  * https://blog.csdn.net/bingshangdeqiji/article/details/105092989
  * https://yuanyu.blog.csdn.net/article/details/108943511
+ * https://blog.csdn.net/shi_xiansheng/article/details/117792691
  */
 public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Cloneable, Serializable {
 
@@ -289,9 +290,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     static class Node<K, V> implements Map.Entry<K, V> {
         //
         final int hash;
-        //
+        // 键
         final K key;
-        //
+        // 值
         V value;
         // 下一个节点的数据
         Node<K, V> next;
@@ -445,6 +446,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * (We also tolerate length zero in some operations to allow
      * bootstrapping mechanics that are currently not needed.)
      */
+    //
     transient Node<K, V>[] table;
 
     /**
@@ -754,6 +756,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             }
             // 数据结构是链表
             else {
+                // 版本差异
+                // 在1.7中采用表头插入法，在扩容时会改变链表中元素原本的顺序，以至于在并发场景下导致链表成环的问题。在1.8中采用尾部插入法，在扩容时会保持链表元素原本的顺序，就不会出现链表成环的问题了。
                 for (int binCount = 0; ; ++binCount) {
                     //p的下一个节点为null,表示p就是最后一个节点
                     if ((e = p.next) == null) {
@@ -819,20 +823,25 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
         //table已经初始化，且容量 > 0
         if (oldCap > 0) {
+            // 判断上界
             if (oldCap >= MAXIMUM_CAPACITY) {
                 //MAXIMUM_CAPACITY=1<<30=2的30次幂=1073741824
                 //如果旧的容量已近达到最大值，则不再扩容，阈值直接设置为最大值
                 //Integer.MAX_VALUE=(1 << 31)-1=2的31次幂-1=2147483648-1
                 threshold = Integer.MAX_VALUE;
                 return oldTab;
-            } else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY && oldCap >= DEFAULT_INITIAL_CAPACITY) {
-                // 扩大两倍
+            }
+            // 16 <= 原来容器扩大2倍 < 1 << 30
+            else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY && oldCap >= DEFAULT_INITIAL_CAPACITY) {
+                // << 1 表示扩大两倍
                 newThr = oldThr << 1; // double threshold
             }
-        } else if (oldThr > 0) {// initial capacity was placed in threshold
+        }
+        else if (oldThr > 0) {// initial capacity was placed in threshold
             //
             newCap = oldThr;
-        } else {
+        }
+        else {
             // zero initial threshold signifies using defaults
             // threshold 和 table 皆未初始化情况，此处即为首次进行初始化
             // 第一次进入什么都没有所以要初始化容器(16)
@@ -853,6 +862,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         Node<K, V>[] newTab = (Node<K, V>[]) new Node[newCap];
         //更新table数据
         table = newTab;
+
         //如果之前的数组桶里面已经存在数据，由于table容量发生变化，hash值也会发生变化，需要重新计算下标
         if (oldTab != null) {
             for (int j = 0; j < oldCap; ++j) {
@@ -864,6 +874,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
                     //指定下标数据只有一个
                     if (e.next == null) {
                         //直接将数据存放到新计算的hash值下标
+                        //
                         newTab[e.hash & (newCap - 1)] = e;
                     }
                     //红黑树
