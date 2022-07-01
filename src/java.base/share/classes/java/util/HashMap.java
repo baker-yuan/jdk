@@ -505,6 +505,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *                                  or the load factor is nonpositive
      */
     /**
+     * 构造函数
      * @param initialCapacity 初始容量(默认16)。
      * @param loadFactor      加载因子(默认0.75)。
      */
@@ -528,6 +529,10 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *
      * @param initialCapacity the initial capacity.
      * @throws IllegalArgumentException if the initial capacity is negative.
+     */
+    /**
+     *
+     * @param initialCapacity 指定到容量如果不是2到n次方，HashMap会选一个靠近initialCapacity最小的2到n次方，作为容量
      */
     public HashMap(int initialCapacity) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR);
@@ -702,6 +707,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      */
     public V put(K key, V value) {
         int hash = hash(key);
+
         return putVal(hash, key, value, false, true);
     }
 
@@ -1634,9 +1640,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     }
 
     final int capacity() {
-        return (table != null) ? table.length :
-                (threshold > 0) ? threshold :
-                        DEFAULT_INITIAL_CAPACITY;
+        return (table != null) ? table.length : (threshold > 0) ? threshold : DEFAULT_INITIAL_CAPACITY;
     }
 
     /**
