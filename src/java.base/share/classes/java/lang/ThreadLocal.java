@@ -73,6 +73,10 @@ import java.util.function.Supplier;
  * @author  Josh Bloch and Doug Lea
  * @since   1.2
  */
+
+/**
+ * https://www.jianshu.com/p/acfd2239c9f4
+ */
 public class ThreadLocal<T> {
     /**
      * ThreadLocals rely on per-thread linear-probe hash maps attached
@@ -125,7 +129,24 @@ public class ThreadLocal<T> {
      *
      * @return the initial value for this thread-local
      */
+    /**
+     * 返回当前线程对应的ThreadLocal的初始值
+     *
+     * 此方法的第一次调用发生在，当前线程通过get方法访问此线程的ThreadLocal值时，
+     * 除非线程先调用了set方法，在这种情况下，initialValue才不会被这个线程调用，
+     * 通常情况下，每个线程最多调用一次这个方法。
+     *
+     * 这个方法仅仅简单的返回null，如果程序员想ThreadLocal线程局部变量有一个除null以外的初始值，
+     * 必须通过子类继承ThreadLocal的方法去重写此方法，
+     * 通常可以通过匿名内部类的方法实现
+     *
+     * @return 当前ThreadLocal的初始值
+     */
     protected T initialValue() {
+        // 此方法的作用是 返回该线程局部变量的初始值
+        // (1) 这个方法是一个延迟调用方法，在set方法还未调用，而先调用了get方法时才执行，并且只执行一次
+        // (2) 这个方法缺省实现直接返回一个null。
+        // (3) 如果想要一个除null之外的初始值，可以重写此方法。(备注：此方法是一个protected的方法，显然是为了子类覆盖而设计的)
         return null;
     }
 
@@ -158,17 +179,45 @@ public class ThreadLocal<T> {
      *
      * @return the current thread's value of this thread-local
      */
+    /**
+     * 返回当前线程中保存的ThreadLocal的值，
+     * 如果当前线程没有此ThreadLocal变量，
+     * 则会通过调用initialValue方法进行初始化
+     *
+     * @return 返回当前线程对应此ThreadLocal的值
+     */
     public T get() {
+        // 步骤
+        // 1）首先获取当前线程，根据当前线程获取一个Map
+        // 2）如果获取的Map不为空，则在Map中以ThreadLocal的引用作为key，在Map中获取对应的Entry e，否则转到第四步4）
+        // 3）如果e不为null，则返回e.value，否则转到第四步4）
+        // 4）Map为空或者e为空，则通过initialValue函数获取初始化值value，然后用ThreadLocal的引用和value作为firstKey和firstValue创建一个新Map。
+        // 总结：先获取当前线程的ThreadLocalMap变量，如果存在返回值，不存在则创建并返回初始值。
+
+        // 获取当前线程对象
         Thread t = Thread.currentThread();
+
+        // 获取此线程对象中维护的ThreadLocalMap对象
         ThreadLocalMap map = getMap(t);
+
+        // 如果此map存在
         if (map != null) {
+            // 以当前的ThreadLocal为key，调用getEntry获取对应的存储实体e
             ThreadLocalMap.Entry e = map.getEntry(this);
+            // 对e进行判空
             if (e != null) {
                 @SuppressWarnings("unchecked")
+                // 获取存储的实体e对应的value值
+                // 即为我们想要的当前线程对应此ThreadLocal值
                 T result = (T)e.value;
                 return result;
             }
         }
+        /**
+         * 初始化：有两种情况执行当前代码
+         * 第一种情况：map不存在，表示此线程没有维护的ThreadLocalMap对象
+         * 第二种情况：map存在，但是没有与当前的ThreadLocal关联entry
+         */
         return setInitialValue();
     }
 
@@ -191,18 +240,36 @@ public class ThreadLocal<T> {
      *
      * @return the initial value
      */
+    /**
+     * 初始化
+     *
+     * @return 初始化后的值
+     */
     private T setInitialValue() {
+        // 调用initialValue获取初始化的值
+        // 此方法可以被子类重写，如果不重写默认返回null
         T value = initialValue();
+
+        // 获取当前线程对象
         Thread t = Thread.currentThread();
+
+        // 获取此对象中维护的ThreadLocalMap对象
         ThreadLocalMap map = getMap(t);
+
+        // 判断map是否存在
         if (map != null) {
+            // 存在则调用map.set设置此实体entry
             map.set(this, value);
         } else {
+            // 当前线程Thread不存在ThreadLocalMap对象，
+            // 则调用createMap进行ThreadLocalMap对象的初始化，
+            // 并将t(当前线程)和value(t对应的值)作为第一个entry存放至ThreadLocalMap中。
             createMap(t, value);
         }
         if (this instanceof TerminatingThreadLocal) {
             TerminatingThreadLocal.register((TerminatingThreadLocal<?>) this);
         }
+        // 返回设置的值value
         return value;
     }
 
@@ -215,12 +282,32 @@ public class ThreadLocal<T> {
      * @param value the value to be stored in the current thread's copy of
      *        this thread-local.
      */
+    /**
+     * 设置当前线程对应的ThreadLocal的值
+     *
+     * @param value 将要保存在当前线程对应的ThreadLocal的值
+     */
     public void set(T value) {
+        // 1）首先获取当前线程，并根据当前线程获取一个Map
+        // 2）如果获取的Map不为空，则将参数设置到Map中(当前ThreadLocal的引用作为key)
+        // 3）如果Map为空，则给该线程创建Map，并设置初始值
+
+
+        // 获取当前线程对象
         Thread t = Thread.currentThread();
+
+        // 获取此线程对象中维护的ThreadLocalMap对象
+        // key=当前ThreadLocal value=当前线程绑定的值
         ThreadLocalMap map = getMap(t);
+
+        // 判断map是否存在
         if (map != null) {
+            // 存在调用map.set设置此实体entry
             map.set(this, value);
         } else {
+            // 当前线程Thread不存在ThreadLocalMap对象，
+            // 则调用createMap进行ThreadLocalMap对象的初始化，
+            // 并将t(当前线程)和value(t对应的值)作为第一个entry存放至ThreadLocalMap中。
             createMap(t, value);
         }
     }
@@ -236,9 +323,20 @@ public class ThreadLocal<T> {
      *
      * @since 1.5
      */
+    /**
+     * 删除当前线程保存的ThreadLocal对应的实体entry
+     */
      public void remove() {
-         ThreadLocalMap m = getMap(Thread.currentThread());
+         // 1）首先获取当前线程，并根据当前线程获取一个Map
+         // 2）如果获取的Map不为空，则移除当前ThreadLocal对象的entry
+
+         // 获取当前线程对象中维护的ThreadLocalMap对象
+         Thread thread = Thread.currentThread();
+         ThreadLocalMap m = getMap(thread);
+         // 如果此map存在
          if (m != null) {
+             // 存在则调用 map.remove
+             // 以当前ThreadLocal作为key删除对应的实体entry
              m.remove(this);
          }
      }
@@ -249,6 +347,11 @@ public class ThreadLocal<T> {
      *
      * @param  t the current thread
      * @return the map
+     */
+    /**
+     * 获取当前线程Thread对应维护的ThreadLocalMap
+     * @param t 当前线程
+     * @return 对应维护的ThreadLocalMap
      */
     ThreadLocalMap getMap(Thread t) {
         return t.threadLocals;
@@ -261,7 +364,13 @@ public class ThreadLocal<T> {
      * @param t the current thread
      * @param firstValue value for the initial entry of the map
      */
+    /**
+     * 创建当前线程Thread对应维护的ThreadLocalMap
+     * @param t 当前线程
+     * @param firstValue 存放到map中第一个entry值
+     */
     void createMap(Thread t, T firstValue) {
+        // 这里的this是调用此方法的ThreadLocal
         t.threadLocals = new ThreadLocalMap(this, firstValue);
     }
 
@@ -317,6 +426,8 @@ public class ThreadLocal<T> {
      * the table starts running out of space.
      */
     static class ThreadLocalMap {
+        // 在ThreadLocalMap中，也是用Entry来保存K-V结构数据的，不过Entry中的key只能是ThreadLocal对象，这点在构造方法中已经限定死了。
+        // 另外，Entry继承WeakReference，也就是key(ThreadLocal)是弱引用，其目的是将ThreadLocal对象的生命周期和线程生命周期解绑。
 
         /**
          * The entries in this hash map extend WeakReference, using
@@ -325,6 +436,11 @@ public class ThreadLocal<T> {
          * == null) mean that the key is no longer referenced, so the
          * entry can be expunged from table.  Such entries are referred to
          * as "stale entries" in the code that follows.
+         */
+        /**
+         * Entry继承WeakReference，并且用ThreadLocal作为key，
+         * 如果key为null(entry.get()==null)，意味着key不再被引用，
+         * 因此这时候entry也可以从table中清除
          */
         static class Entry extends WeakReference<ThreadLocal<?>> {
             /** The value associated with this ThreadLocal. */
@@ -339,23 +455,33 @@ public class ThreadLocal<T> {
         /**
          * The initial capacity -- MUST be a power of two.
          */
+        // 初始容量 - 必须是2的整数次幂
         private static final int INITIAL_CAPACITY = 16;
 
         /**
          * The table, resized as necessary.
          * table.length MUST always be a power of two.
          */
+        // 存放数据的table，同样数组长度必须是2的整数次幂
         private Entry[] table;
 
         /**
          * The number of entries in the table.
          */
+        // 数组里面entrys的个数，可以用于判断table当前使用量是否操作阈值
         private int size = 0;
 
         /**
          * The next size value at which to resize.
          */
+        // 进行扩容的阈值，表使用量大于它的时候进行扩容
         private int threshold; // Default to 0
+
+        // 和HashMap类似，INITIAL_CAPACITY代表这个Map的初始容量，
+        // table是一个Entry类型的数组，用于存储数据，
+        // size代表表中存储数目，threshold代表需要扩容时对应size的阈值。
+
+
 
         /**
          * Set the resize threshold to maintain at worst a 2/3 load factor.

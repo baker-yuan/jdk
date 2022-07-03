@@ -179,6 +179,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * programming practices that are already so slow that this makes
      * little difference.)
      *
+     * bin: 桶（数组的一个下标）
+     * 为什么转为红黑树阈值是8的解释
+     * 1、空间和时间的一个权衡
+     * 1、根据柏松分布链表长度达到8的概率已经是很小很小了
+     *
      * Because TreeNodes are about twice the size of regular nodes, we
      * use them only when bins contain enough nodes to warrant use
      * (see TREEIFY_THRESHOLD). And when they become too small (due to
@@ -237,6 +242,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * avoid aliasing errors amid all of the twisty pointer operations.
      */
 
+
+
     /**
      * The default initial capacity - MUST be a power of two.
      */
@@ -248,7 +255,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * by either of the constructors with arguments.
      * MUST be a power of two <= 1<<30.
      */
-    // 最大容量
+    // 集合最大容量的上限是：2的30次幂
     static final int MAXIMUM_CAPACITY = 1 << 30;
 
     /**
@@ -257,6 +264,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     // 默认加载因子值
     static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
+    // 转为红黑树 数组长度大于64并且桶上的链表长度大于8
     /**
      * The bin count threshold for using a tree rather than list for a
      * bin.  Bins are converted to trees when adding an element to a
@@ -265,22 +273,31 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * tree removal about conversion back to plain bins upon
      * shrinkage.
      */
+    // 当桶(bucket)上的结点数大于这个值时会转成红黑树
     static final int TREEIFY_THRESHOLD = 8;
-
-    /**
-     * The bin count threshold for untreeifying a (split) bin during a
-     * resize operation. Should be less than TREEIFY_THRESHOLD, and at
-     * most 6 to mesh with shrinkage detection under removal.
-     */
-    static final int UNTREEIFY_THRESHOLD = 6;
-
     /**
      * The smallest table capacity for which bins may be treeified.
      * (Otherwise the table is resized if too many nodes in a bin.)
      * Should be at least 4 * TREEIFY_THRESHOLD to avoid conflicts
      * between resizing and treeification thresholds.
      */
+    // 桶中结构转化为红黑树对应的数组长度最小的值
     static final int MIN_TREEIFY_CAPACITY = 64;
+
+
+
+    /**
+     * The bin count threshold for untreeifying a (split) bin during a
+     * resize operation. Should be less than TREEIFY_THRESHOLD, and at
+     * most 6 to mesh with shrinkage detection under removal.
+     */
+    //当桶(bucket)上的结点数小于这个值时树转链表
+    static final int UNTREEIFY_THRESHOLD = 6;
+
+
+
+
+
 
     /**
      * Basic hash bin node, used for most entries.  (See below for
@@ -378,7 +395,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     // 从identityHashCode()方法看出key可以是任意类型，都可以变成int类型的hashCode。
     // ----------------------- hashCode底层 -----------------------
 
-    //
+    // key可以为null (key == null) ? 0 : ...
+    // Hashtable不可以，他直接使用了hash=key.hashCode()，会触发空指针 java.util.Hashtable.addEntry
     static final int hash(Object key) {
         // 步骤
         // 1、无符号位移(>>>)
@@ -387,6 +405,12 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
         //h>>>16 >>>是无符号右移，是用来取出h的高16
         int h; // 4字节 32位
+
+        // 1）如果key等于null：
+        // 	可以看到当key等于null的时候也是有哈希值的，返回的是0.
+        // 2）如果key不等于null：
+        // 	首先计算出key的hashCode（比较大）赋值给h，然后与h无符号右移16位后的二进制进行按位异或得到最后的hash值
+
         return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
     }
 
@@ -438,6 +462,58 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
     }
 
+    /**
+     * 早期的一个版本
+     */
+    // ----------------------- cap=10 -----------------------
+    //|（按位或运算）：运算规则：相同的二进制数位上，都是0的时候，结果为0，否则为1。
+    // cap=10
+
+    // n=9
+    // n |= n>>> 1
+    // 00000000 00000000 00000000 00001001 9 容量减一 cap-1
+    // 00000000 00000000 00000000 00000100 4 无符号又移 n>>>1
+    // 00000000 00000000 00000000 00001101 13 前面结果异或 |= 目的就是把原来为1的右变也变成1
+
+    // n=13
+    // n |= n >>> 2
+    // 00000000 00000000 00000000 00001101 13
+    // 00000000 00000000 00000000 00000011 3
+    // 00000000 00000000 00000000 00001111 15
+
+    // n=15
+    // n |= n >>> 4
+    // 00000000 00000000 00000000 00001111 15
+    // 00000000 00000000 00000000 00000000 0
+    // 00000000 00000000 00000000 00001111 15
+
+    // 后续操作这个值不会在变了 固定为 15
+    // n |= n >>> 8;
+    // n |= n >>> 16;
+
+    // 结论：想办法把最左边的那个1后面的0全变成1
+    // 初始 9
+    // 00000000 00000000 00000000 00001001
+    // 结束 15
+    // 00000000 00000000 00000000 00001111
+    // ----------------------- cap=10 -----------------------
+    static final int tableSizeForV1(int cap) {
+        // cap=0 返回1
+        int n = cap - 1; // 给 16
+        n |= n >>> 1;
+        n |= n >>> 2;
+        n |= n >>> 4;
+        n |= n >>> 8;
+        n |= n >>> 16;
+        return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+    }
+
+
+
+
+
+
+
     /* ---------------- Fields -------------- */
 
     /**
@@ -446,13 +522,14 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * (We also tolerate length zero in some operations to allow
      * bootstrapping mechanics that are currently not needed.)
      */
-    //
+    // 存储元素的数组
     transient Node<K, V>[] table;
 
     /**
      * Holds cached entrySet(). Note that AbstractMap fields are used
      * for keySet() and values().
      */
+    // 存放具体元素的集合
     transient Set<Map.Entry<K, V>> entrySet;
 
     /**
@@ -468,6 +545,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * rehash).  This field is used to make iterators on Collection-views of
      * the HashMap fail-fast.  (See ConcurrentModificationException).
      */
+    // 每次扩容和更改map结构的计数器
     transient int modCount;
 
     /**
@@ -479,19 +557,24 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     // Additionally, if the table array has not been allocated, this
     // field holds the initial array capacity, or zero signifying
     // DEFAULT_INITIAL_CAPACITY.)
-    // 阈值（临界值）：hashMap所能容纳的最大键值对数量，如果超过则需要扩容，计算方式：threshold=capacity(容量)*loadFactor(加载因子)。
-    int threshold;
+    // 阈值（临界值）：hashMap所能容纳的最大键值对数量，如果超过则需要扩容，计算方式：threshold=capacity(容量/桶的数量)*loadFactor(加载因子)。
+    // 初始化 12 = 16 * 0.75
+    int threshold; // 按道理初始化应该为12实际上不是的，第一次put才回给12，如果是默认构造函数这里new的时候给的是16
 
     /**
      * The load factor for the hash table.
      *
      * @serial
      */
+    // 加载因子
     // 哈希表的加载因子 默认DEFAULT_LOAD_FACTOR
     // 在默认情况下，数组大小为16，那么当HashMap中元素个数超过 16*0.75=12 的时候，
     // 就把数组的大小扩展为 16*2=32 ，即扩大一倍，然后重新计算每个元素在数组中的位置。
     // 当然这个值是可以自己设定的，但是不推荐修改这个值。
     final float loadFactor;
+
+
+
 
     /* ---------------- Public operations -------------- */
 
@@ -505,21 +588,35 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *                                  or the load factor is nonpositive
      */
     /**
-     * 构造函数
+     * 指定“容量大小”和“加载因子”的构造函数
      * @param initialCapacity 初始容量(默认16)。
      * @param loadFactor      加载因子(默认0.75)。
      */
     public HashMap(int initialCapacity, float loadFactor) {
+        //判断初始化容量initialCapacity是否小于0
         if (initialCapacity < 0) {
+            //如果小于0，则抛出非法的参数异常IllegalArgumentException
             throw new IllegalArgumentException("Illegal initial capacity: " + initialCapacity);
         }
+        //判断初始化容量initialCapacity是否大于集合的最大容量MAXIMUM_CAPACITY->2的30次幂
         if (initialCapacity > MAXIMUM_CAPACITY) {
+            //如果超过MAXIMUM_CAPACITY，会将MAXIMUM_CAPACITY赋值给initialCapacity
             initialCapacity = MAXIMUM_CAPACITY;
         }
+        //判断负载因子loadFactor是否小于等于0或者是否是一个非数值
         if (loadFactor <= 0 || Float.isNaN(loadFactor)) {
+            //如果满足上述其中之一，则抛出非法的参数异常IllegalArgumentException
             throw new IllegalArgumentException("Illegal load factor: " + loadFactor);
         }
+
+        // 将指定的加载因子赋值给HashMap成员变量的负载因子loadFactor
         this.loadFactor = loadFactor;
+
+        // tableSizeFor(initialCapacity) 判断指定的初始化容量是否是2的n次幂，如果不是那么会变为比指定初始化容量大的最小的2的n次幂。这点上述已经讲解过。
+        // 但是注意，在tableSizeFor方法体内部将计算后的数据返回给调用这里了，并且直接赋值给threshold边界值了。有些人会觉得这里是一个bug,应该这样书写：
+        // this.threshold = tableSizeFor(initialCapacity) * this.loadFactor;
+        // 这样才符合threshold的意思（当HashMap的size到达threshold这个阈值时会扩容）。
+        // 但是，请注意，在jdk8以后的构造方法中，并没有对table这个成员变量进行初始化，table的初始化被推迟到了put方法中，在put方法中会对threshold重新计算。
         this.threshold = tableSizeFor(initialCapacity);
     }
 
@@ -531,10 +628,12 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * @throws IllegalArgumentException if the initial capacity is negative.
      */
     /**
-     *
+     * 指定“容量大小”的构造函数
      * @param initialCapacity 指定到容量如果不是2到n次方，HashMap会选一个靠近initialCapacity最小的2到n次方，作为容量
      */
     public HashMap(int initialCapacity) {
+        // 7(initialCapacity) -> 8
+        // 20(initialCapacity) -> 32
         this(initialCapacity, DEFAULT_LOAD_FACTOR);
     }
 
@@ -543,7 +642,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * (16) and the default load factor (0.75).
      */
     public HashMap() {
-        // 构造一个具有默认加载因子 (0.75) 的空 HashMap。
+        // 构造一个具有默认加载因子 (0.75) 的空 HashMap（并没有创建数组）。
+        // put方法会触发扩容
         this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
     }
 
@@ -556,7 +656,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * @param m the map whose mappings are to be placed in this map
      * @throws NullPointerException if the specified map is null
      */
+    //构造一个映射关系与指定 Map 相同的新 HashMap。
     public HashMap(Map<? extends K, ? extends V> m) {
+        //负载因子loadFactor变为默认的负载因子0.75
         this.loadFactor = DEFAULT_LOAD_FACTOR;
         putMapEntries(m, false);
     }
@@ -571,14 +673,23 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     final void putMapEntries(Map<? extends K, ? extends V> m, boolean evict) {
         int s = m.size();
         if (s > 0) {
+            // 空集合 java.util.HashMap.HashMap(java.util.Map<? extends K,? extends V>)
             if (table == null) { // pre-size
-                float ft = ((float) s / loadFactor) + 1.0F;
-                int t = ((ft < (float) MAXIMUM_CAPACITY) ?
-                        (int) ft : MAXIMUM_CAPACITY);
-                if (t > threshold)
+                // 假设 s=6
+                // ft = (float)(6 / 0.75) + 1 = 8
+                float ft = ((float) s / loadFactor) + 1.0F; // +1 尽量减少扩容 6-> 16 不加一 6-> 8
+                int t = ((ft < (float) MAXIMUM_CAPACITY) ? (int) ft : MAXIMUM_CAPACITY);
+                // 9 > 0 的到16
+                if (t > threshold) {
                     threshold = tableSizeFor(t);
-            } else if (s > threshold)
+                }
+            }
+            // 已经有元素了 java.util.HashMap.putAll
+            else if (s > threshold) {
                 resize();
+            }
+
+            // 创建完对象编译原来的对象插入元素
             for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
                 K key = e.getKey();
                 V value = e.getValue();
@@ -707,7 +818,6 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      */
     public V put(K key, V value) {
         int hash = hash(key);
-
         return putVal(hash, key, value, false, true);
     }
 
@@ -732,6 +842,47 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * @return 前一个值，如果没有则返回 null
      */
     final V putVal(int hash, K key, V value, boolean onlyIfAbsent, boolean evict) {
+        // 实现步骤
+        // 1）先通过hash值计算出key映射到哪个桶。
+        // 2）如果桶上没有碰撞冲突，则直接插入。
+        // 3）如果出现碰撞冲突了，则需要处理冲突。
+        //    a:如果该桶使用红黑树处理冲突，则调用红黑树的方法插入数据。
+        //    b:否则采用传统的链式方法插入。如果链的长度达到临界值，则把链转变为红黑树。
+        // 4）如果桶中存在重复的键，则为该键替换新值value。
+        // 5）如果size大于阈值threshold，则进行扩容。
+
+        // 说明：
+        // 1）key.hashCode()；返回散列值也就是hashcode。假设随便生成的一个值。
+        // 2）n表示数组初始化的长度是16
+        // 3）&（按位与运算）：运算规则：相同的二进制数位上，都是1的时候，结果为1，否则为零。
+        // 4）^（按位异或运算）：运算规则：相同的二进制数位上，数字相同，结果为0，不同为1。
+        // (h = key.hashCode()) ^ (h >>> 16)
+        // (n - 1) & hash
+        // key.hashCode()计算出的值
+
+        // 计算过程
+        // 1111 1111 1111 1111 1111 0000 1110 1010 h
+        // 0000 0000 0000 0000 1111 1111 1111 1111 h >>> 16
+        // ------------------------------------------------ (h = key.hashCode()) ^ (h >>> 16)
+        // 1111 1111 1111 1111 0000 1111 0001 0101 返回的结果hash
+        // 0000 0000 0000 0000 0000 0000 0000 1111 15 n-1 16-1
+        // ------------------------------------------------  (n - 1) & hash
+        // 0000 0000 0000 0000 0000 0000 0000 0101 计算出的索引是5
+
+        // hashCode高位变化很大，而低位变化很小或者没有变化，那么如果直接和数组的长度进行&运算，会很容易造成计算结果一样，导致hash冲突
+        // 假设省略了第一步 (h = key.hashCode()) ^ (h >>> 16)
+        // 1111 1111 1111 1111 1111 0000 1110 1010 h
+        // 0000 0000 0000 0000 0000 0000 0000 1111 15 n-1 16-1
+        // ------------------------------------------------  (n - 1) & hash
+        // 0000 0000 0000 0000 0000 0000 0000 1010 计算出的索引是10
+
+        // 再来一个hashCode 高位变化很大而地位变化很小或者没有变化
+        // 1001 1001 0000 1111 0000 1111 0001 1010
+        // 0000 0000 0000 0000 0000 0000 0000 1111 15 n-1 16-1
+        // ------------------------------------------------  (n - 1) & hash
+        // 0000 0000 0000 0000 0000 0000 0000 1010 计算出的索引依然是10
+
+
         Node<K, V>[] tab;   // 数组
         Node<K, V> p;       // key对应的数组值
         int n;              // 数组大小
@@ -753,6 +904,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             K k;
             //判断tab[i]的hash值传入的hash值相当，tab[i]的的key值和传入的key值相同
             if (p.hash == hash && ((k = p.key) == key || (key != null && key.equals(k)))) {
+                // 插入已有的元素
                 e = p;
             }
             // 数据结构是红黑树
@@ -847,6 +999,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             //
             newCap = oldThr;
         }
+        // 第一次put触发扩容
         else {
             // zero initial threshold signifies using defaults
             // threshold 和 table 皆未初始化情况，此处即为首次进行初始化
@@ -864,6 +1017,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         //更新阈值(当前hashmap不扩容的前提下能够装下的值)
         threshold = newThr;
 
+        // 在这里创建数组
         @SuppressWarnings({"rawtypes", "unchecked"})
         Node<K, V>[] newTab = (Node<K, V>[]) new Node[newCap];
         //更新table数据
@@ -933,15 +1087,28 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     /**
      * Replaces all linked nodes in bin at index for given hash unless
      * table is too small, in which case resizes instead.
+     *
+     * 替换指定哈希表的索引处桶中的所有链接节点，除非表太小，否则将修改大小。
+     * @param tab 数组名
+     * @param hash 哈希值
      */
     final void treeifyBin(Node<K, V>[] tab, int hash) {
-        int n, index;
-        Node<K, V> e;
-        if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY)
+        int n;
+        int index;
+        Node<K, V> e; // 当前桶中的元素(链表)
+
+        if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY) {
+            // 及时链表长度大于8，但是tab长度小于64依然是触发扩容而不是转为红黑树
             resize();
+        }
+        // 转为红黑树
         else if ((e = tab[index = (n - 1) & hash]) != null) {
-            TreeNode<K, V> hd = null, tl = null;
+            TreeNode<K, V> hd = null; // 红黑树头节点
+            TreeNode<K, V> tl = null; // 红黑树尾节点
+
+            // 把链表转为树，这里并不是一步到位的，先把链表转为倾斜的数据（退化为链表的数）
             do {
+                //
                 TreeNode<K, V> p = replacementTreeNode(e, null);
                 if (tl == null)
                     hd = p;
@@ -951,8 +1118,12 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
                 }
                 tl = p;
             } while ((e = e.next) != null);
-            if ((tab[index] = hd) != null)
+
+            // 把红黑树头节点放到桶中
+            if ((tab[index] = hd) != null) {
+                // 旋转 使其满足红黑树结构
                 hd.treeify(tab);
+            }
         }
     }
 
@@ -979,8 +1150,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      */
     public V remove(Object key) {
         Node<K, V> e;
-        return (e = removeNode(hash(key), key, null, false, true)) == null ?
-                null : e.value;
+        return (e = removeNode(hash(key), key, null, false, true)) == null ? null : e.value;
     }
 
     /**
@@ -999,7 +1169,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         int n, index;
         //判断table是否存在、数据元素大于>0、index位置元素是否存在
         if ((tab = table) != null && (n = tab.length) > 0 && (p = tab[index = (n - 1) & hash]) != null) {
-            Node<K, V> node = null, e;
+            Node<K, V> node = null;
+            Node<K, V> e;
             K k;
             V v;
             //判断p和传入的数据一致
