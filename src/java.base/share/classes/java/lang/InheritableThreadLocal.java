@@ -50,6 +50,12 @@ import java.lang.ref.*;
  * @since   1.2
  */
 
+/**
+ * InheritableThreadLocal主要用于子线程创建时，需要自动继承父线程的ThreadLocal变量，方便必要信息的进一步传递。
+ *
+ * 但是InheritableThreadLocal的继承性是在new Thread创建子线程时候在构造函数内把父线程内线程变量拷贝到子线程内部的。
+ * 为了不在创建新线程耗费资源，我们一般会用线程池，线程池的线程会复用，那么线程中的ThreadLocal便不对了，可能是旧的，因为线程是旧的。
+ */
 public class InheritableThreadLocal<T> extends ThreadLocal<T> {
     /**
      * Computes the child's initial value for this inheritable thread-local
@@ -63,6 +69,11 @@ public class InheritableThreadLocal<T> extends ThreadLocal<T> {
      * @param parentValue the parent thread's value
      * @return the child thread's initial value
      */
+    /**
+     * 该函数在父线程创建子线程，向子线程复制InheritableThreadLocal变量时使用
+     * @param parentValue the parent thread's value
+     * @return the child thread's initial value
+     */
     protected T childValue(T parentValue) {
         return parentValue;
     }
@@ -72,12 +83,27 @@ public class InheritableThreadLocal<T> extends ThreadLocal<T> {
      *
      * @param t the current thread
      */
+    /**
+     * 由于重写了getMap，操作InheritableThreadLocal时，
+     * 将只影响Thread类中的inheritableThreadLocals变量，
+     * 与threadLocals变量不再有关系
+     * @param t the current thread
+     * @return ThreadLocalMap
+     */
     ThreadLocalMap getMap(Thread t) {
        return t.inheritableThreadLocals;
     }
 
     /**
      * Create the map associated with a ThreadLocal.
+     *
+     * @param t the current thread
+     * @param firstValue value for the initial entry of the table.
+     */
+    /**
+     * 类似于getMap，操作InheritableThreadLocal时，
+     * 将只影响Thread类中的inheritableThreadLocals变量，
+     * 与threadLocals变量不再有关系
      *
      * @param t the current thread
      * @param firstValue value for the initial entry of the table.

@@ -177,12 +177,17 @@ class Thread implements Runnable {
 
     /* ThreadLocal values pertaining to this thread. This map is maintained
      * by the ThreadLocal class. */
-    //
+    /**
+     * 当前线程的ThreadLocalMap，主要存储该线程自身的ThreadLocal
+     */
     ThreadLocal.ThreadLocalMap threadLocals = null;
-
     /*
      * InheritableThreadLocal values pertaining to this thread. This map is
      * maintained by the InheritableThreadLocal class.
+     */
+    /**
+     * InheritableThreadLocal，自父线程集成而来的ThreadLocalMap，
+     * 主要用于父子线程间ThreadLocal变量的传递
      */
     ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
 
@@ -392,15 +397,14 @@ class Thread implements Runnable {
      * @param inheritThreadLocals if {@code true}, inherit initial values for
      *            inheritable thread-locals from the constructing thread
      */
-    private Thread(ThreadGroup g, Runnable target, String name,
-                   long stackSize, AccessControlContext acc,
-                   boolean inheritThreadLocals) {
+    private Thread(ThreadGroup g, Runnable target, String name, long stackSize, AccessControlContext acc, boolean inheritThreadLocals) {
         if (name == null) {
             throw new NullPointerException("name cannot be null");
         }
 
         this.name = name;
 
+        // 父线程
         Thread parent = currentThread();
         SecurityManager security = System.getSecurityManager();
         if (g == null) {
@@ -428,8 +432,7 @@ class Thread implements Runnable {
          */
         if (security != null) {
             if (isCCLOverridden(getClass())) {
-                security.checkPermission(
-                        SecurityConstants.SUBCLASS_IMPLEMENTATION_PERMISSION);
+                security.checkPermission(SecurityConstants.SUBCLASS_IMPLEMENTATION_PERMISSION);
             }
         }
 
@@ -438,17 +441,22 @@ class Thread implements Runnable {
         this.group = g;
         this.daemon = parent.isDaemon();
         this.priority = parent.getPriority();
-        if (security == null || isCCLOverridden(parent.getClass()))
+        if (security == null || isCCLOverridden(parent.getClass())) {
             this.contextClassLoader = parent.getContextClassLoader();
-        else
+        }
+        else {
             this.contextClassLoader = parent.contextClassLoader;
-        this.inheritedAccessControlContext =
-                acc != null ? acc : AccessController.getContext();
+        }
+        this.inheritedAccessControlContext = acc != null ? acc : AccessController.getContext();
         this.target = target;
         setPriority(priority);
-        if (inheritThreadLocals && parent.inheritableThreadLocals != null)
-            this.inheritableThreadLocals =
-                ThreadLocal.createInheritedMap(parent.inheritableThreadLocals);
+
+        // 采用默认方式产生子线程时，inheritThreadLocals=true。
+        // 若此时父线程inheritableThreadLocals不为空，则将父线程inheritableThreadLocals传递至子线程。
+        if (inheritThreadLocals && parent.inheritableThreadLocals != null) {
+            this.inheritableThreadLocals = ThreadLocal.createInheritedMap(parent.inheritableThreadLocals);
+        }
+
         /* Stash the specified stack size in case the VM cares */
         this.stackSize = stackSize;
 
@@ -705,8 +713,8 @@ class Thread implements Runnable {
      *
      * @since 1.4
      */
-    public Thread(ThreadGroup group, Runnable target, String name,
-                  long stackSize) {
+    public Thread(ThreadGroup group, Runnable target, String name, long stackSize) {
+        // 默认情况下，设置inheritThreadLocals可传递
         this(group, target, name, stackSize, null, true);
     }
 
