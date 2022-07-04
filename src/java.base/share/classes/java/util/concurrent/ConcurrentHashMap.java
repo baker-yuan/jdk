@@ -627,9 +627,15 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * exported).  Otherwise, keys and vals are never null.
      */
     static class Node<K,V> implements Map.Entry<K,V> {
+
         final int hash;
+
         final K key;
+
+        // volatile修饰
         volatile V val;
+
+        // volatile修饰
         volatile Node<K,V> next;
 
         Node(int hash, K key, V val) {
@@ -764,8 +770,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         return (Node<K,V>)U.getObjectAcquire(tab, ((long)i << ASHIFT) + ABASE);
     }
 
-    static final <K,V> boolean casTabAt(Node<K,V>[] tab, int i,
-                                        Node<K,V> c, Node<K,V> v) {
+    static final <K,V> boolean casTabAt(Node<K,V>[] tab, int i, Node<K,V> c, Node<K,V> v) {
         return U.compareAndSetObject(tab, ((long)i << ASHIFT) + ABASE, c, v);
     }
 
@@ -893,8 +898,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * negative or the load factor or concurrencyLevel are
      * nonpositive
      */
-    public ConcurrentHashMap(int initialCapacity,
-                             float loadFactor, int concurrencyLevel) {
+    public ConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
         if (!(loadFactor > 0.0f) || initialCapacity < 0 || concurrencyLevel <= 0)
             throw new IllegalArgumentException();
         if (initialCapacity < concurrencyLevel)   // Use at least as many bins
@@ -936,20 +940,27 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * @throws NullPointerException if the specified key is null
      */
     public V get(Object key) {
-        Node<K,V>[] tab; Node<K,V> e, p; int n, eh; K ek;
+        Node<K,V>[] tab;
+        Node<K,V> e;
+        Node<K,V> p;
+        int n;
+        int eh;
+        K ek;
         int h = spread(key.hashCode());
-        if ((tab = table) != null && (n = tab.length) > 0 &&
-            (e = tabAt(tab, (n - 1) & h)) != null) {
+
+        if ((tab = table) != null && (n = tab.length) > 0 && (e = tabAt(tab, (n - 1) & h)) != null) {
             if ((eh = e.hash) == h) {
-                if ((ek = e.key) == key || (ek != null && key.equals(ek)))
+                if ((ek = e.key) == key || (ek != null && key.equals(ek))) {
                     return e.val;
+                }
             }
-            else if (eh < 0)
+            else if (eh < 0) {
                 return (p = e.find(h, key)) != null ? p.val : null;
+            }
             while ((e = e.next) != null) {
-                if (e.hash == h &&
-                    ((ek = e.key) == key || (ek != null && key.equals(ek))))
+                if (e.hash == h && ((ek = e.key) == key || (ek != null && key.equals(ek)))) {
                     return e.val;
+                }
             }
         }
         return null;
@@ -1010,26 +1021,45 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         return putVal(key, value, false);
     }
 
-    /** Implementation for put and putIfAbsent */
+    /**
+     * Implementation for put and putIfAbsent
+     */
     final V putVal(K key, V value, boolean onlyIfAbsent) {
-        if (key == null || value == null) throw new NullPointerException();
+        // key 和 value 都不允许为空
+        if (key == null || value == null) {
+            // key不能为null，估计是作者不喜欢null为key的原因
+            // value不能为null，
+
+            throw new NullPointerException();
+        }
+        //
         int hash = spread(key.hashCode());
         int binCount = 0;
         for (Node<K,V>[] tab = table;;) {
-            Node<K,V> f; int n, i, fh; K fk; V fv;
-            if (tab == null || (n = tab.length) == 0)
+            Node<K,V> f;
+            int n; // tab.length
+            int i; //
+            int fh;
+            K fk;
+            V fv;
+            if (tab == null || (n = tab.length) == 0) {
+                //
                 tab = initTable();
-            else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
-                if (casTabAt(tab, i, null, new Node<K,V>(hash, key, value)))
-                    break;                   // no lock when adding to empty bin
             }
-            else if ((fh = f.hash) == MOVED)
+            else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
+                if (casTabAt(tab, i, null, new Node<K,V>(hash, key, value))) {
+                    break; // no lock when adding to empty bin
+                }
+            }
+            else if ((fh = f.hash) == MOVED) {
                 tab = helpTransfer(tab, f);
+            }
             else if (onlyIfAbsent // check first node without acquiring lock
                      && fh == hash
                      && ((fk = f.key) == key || (fk != null && key.equals(fk)))
-                     && (fv = f.val) != null)
+                     && (fv = f.val) != null) {
                 return fv;
+            }
             else {
                 V oldVal = null;
                 synchronized (f) {
@@ -1038,12 +1068,11 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                             binCount = 1;
                             for (Node<K,V> e = f;; ++binCount) {
                                 K ek;
-                                if (e.hash == hash &&
-                                    ((ek = e.key) == key ||
-                                     (ek != null && key.equals(ek)))) {
+                                if (e.hash == hash && ((ek = e.key) == key || (ek != null && key.equals(ek)))) {
                                     oldVal = e.val;
-                                    if (!onlyIfAbsent)
+                                    if (!onlyIfAbsent) {
                                         e.val = value;
+                                    }
                                     break;
                                 }
                                 Node<K,V> pred = e;
@@ -1056,22 +1085,25 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                         else if (f instanceof TreeBin) {
                             Node<K,V> p;
                             binCount = 2;
-                            if ((p = ((TreeBin<K,V>)f).putTreeVal(hash, key,
-                                                           value)) != null) {
+                            if ((p = ((TreeBin<K,V>)f).putTreeVal(hash, key, value)) != null) {
                                 oldVal = p.val;
-                                if (!onlyIfAbsent)
+                                if (!onlyIfAbsent) {
                                     p.val = value;
+                                }
                             }
                         }
-                        else if (f instanceof ReservationNode)
+                        else if (f instanceof ReservationNode) {
                             throw new IllegalStateException("Recursive update");
+                        }
                     }
                 }
                 if (binCount != 0) {
-                    if (binCount >= TREEIFY_THRESHOLD)
+                    if (binCount >= TREEIFY_THRESHOLD) {
                         treeifyBin(tab, i);
-                    if (oldVal != null)
+                    }
+                    if (oldVal != null) {
                         return oldVal;
+                    }
                     break;
                 }
             }
@@ -2287,8 +2319,9 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
     private final Node<K,V>[] initTable() {
         Node<K,V>[] tab; int sc;
         while ((tab = table) == null || tab.length == 0) {
-            if ((sc = sizeCtl) < 0)
+            if ((sc = sizeCtl) < 0) {
                 Thread.yield(); // lost initialization race; just spin
+            }
             else if (U.compareAndSetInt(this, SIZECTL, sc, -1)) {
                 try {
                     if ((tab = table) == null || tab.length == 0) {
