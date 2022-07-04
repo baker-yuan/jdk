@@ -8,13 +8,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConcurrentHashMapTest {
     public static void main(String[] args) {
-        ConcurrentHashMap<String, Object> concurrentHashMap = new ConcurrentHashMap<>();
-        concurrentHashMap.put("k", "v");
+        ConcurrentHashMap<Object, Object> concurrentHashMap = new ConcurrentHashMap<>();
+        concurrentHashMap.put(0, "v");
         System.out.println(concurrentHashMap);
 
-        Jdk7ConcurrentHashMap<String, Object> jdk7ConcurrentHashMap = new Jdk7ConcurrentHashMap<>();
-        jdk7ConcurrentHashMap.put("k", "v");
-        Object k = jdk7ConcurrentHashMap.get("k");
-        System.out.println(jdk7ConcurrentHashMap);
+        // Jdk7ConcurrentHashMap<String, Object> jdk7ConcurrentHashMap = new Jdk7ConcurrentHashMap<>();
+        // jdk7ConcurrentHashMap.put("k", "v");
+        // Object k = jdk7ConcurrentHashMap.get("k");
+        // System.out.println(jdk7ConcurrentHashMap);
     }
 }
