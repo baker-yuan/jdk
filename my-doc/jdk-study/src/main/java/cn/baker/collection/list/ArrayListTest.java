@@ -1,4 +1,4 @@
-package cn.baker;
+package cn.baker.collection.list;
 
 import java.util.ArrayList;
 

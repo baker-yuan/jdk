@@ -1,4 +1,4 @@
-package cn.baker;
+package cn.baker.collection.map;
 
 import java.util.concurrent.ConcurrentHashMap;
 

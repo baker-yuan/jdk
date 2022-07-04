@@ -1,39 +1,12 @@
-package cn.baker;
+package cn.baker.collection.map;
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
-
 /*
- *
- *
- *
- *
- *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
-
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.*;
@@ -41,8 +14,6 @@ import java.util.*;
 import java.io.Serializable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamField;
 
 /**
  * A hash table supporting full concurrency of retrievals and
@@ -177,6 +148,10 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      * which would make it impossible to obtain an accurate result.
      */
     static final int RETRIES_BEFORE_LOCK = 2;
+
+
+
+
 
     /* ---------------- Fields -------------- */
 
@@ -322,8 +297,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      * Sets the ith element of given table, with volatile write
      * semantics. (See above about use of putOrderedObject.)
      */
-    static final <K,V> void setEntryAt(HashEntry<K,V>[] tab, int i,
-                                       HashEntry<K,V> e) {
+    static final <K,V> void setEntryAt(HashEntry<K,V>[] tab, int i, HashEntry<K,V> e) {
         UNSAFE.putOrderedObject(tab, ((long)i << TSHIFT) + TBASE, e);
     }
 

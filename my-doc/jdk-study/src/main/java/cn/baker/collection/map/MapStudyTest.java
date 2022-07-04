@@ -1,4 +1,4 @@
-package cn.baker;
+package cn.baker.collection.map;
 
 //https://blog.csdn.net/wangshuaiwsws95/article/details/107375724/
 //https://www.jianshu.com/p/b8177780c939
