@@ -1,39 +1,12 @@
-package cn.baker;
+package cn.baker.collection.map;
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
-
 /*
- *
- *
- *
- *
- *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
-
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.*;
@@ -41,8 +14,6 @@ import java.util.*;
 import java.io.Serializable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamField;
 
 /**
  * A hash table supporting full concurrency of retrievals and
@@ -177,6 +148,10 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      * which would make it impossible to obtain an accurate result.
      */
     static final int RETRIES_BEFORE_LOCK = 2;
+
+
+
+
 
     /* ---------------- Fields -------------- */
 
@@ -322,8 +297,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      * Sets the ith element of given table, with volatile write
      * semantics. (See above about use of putOrderedObject.)
      */
-    static final <K,V> void setEntryAt(HashEntry<K,V>[] tab, int i,
-                                       HashEntry<K,V> e) {
+    static final <K,V> void setEntryAt(HashEntry<K,V>[] tab, int i, HashEntry<K,V> e) {
         UNSAFE.putOrderedObject(tab, ((long)i << TSHIFT) + TBASE, e);
     }
 
@@ -446,8 +420,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
         }
 
         final V put(K key, int hash, V value, boolean onlyIfAbsent) {
-            HashEntry<K,V> node = tryLock() ? null :
-                scanAndLockForPut(key, hash, value);
+            HashEntry<K,V> node = tryLock() ? null : scanAndLockForPut(key, hash, value);
             V oldValue;
             try {
                 HashEntry<K,V>[] tab = table;
@@ -468,15 +441,17 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
                         e = e.next;
                     }
                     else {
-                        if (node != null)
+                        if (node != null) {
                             node.setNext(first);
-                        else
+                        } else {
                             node = new HashEntry<K,V>(hash, key, value, first);
+                        }
                         int c = count + 1;
-                        if (c > threshold && tab.length < MAXIMUM_CAPACITY)
+                        if (c > threshold && tab.length < MAXIMUM_CAPACITY) {
                             rehash(node);
-                        else
+                        } else {
                             setEntryAt(tab, index, node);
+                        }
                         ++modCount;
                         count = c;
                         oldValue = null;
@@ -484,6 +459,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
                     }
                 }
             } finally {
+                //
                 unlock();
             }
             return oldValue;
@@ -523,9 +499,9 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
                 if (e != null) {
                     HashEntry<K,V> next = e.next;
                     int idx = e.hash & sizeMask;
-                    if (next == null)   //  Single node on list
+                    if (next == null) { //  Single node on list
                         newTable[idx] = e;
-                    else { // Reuse consecutive sequence at same slot
+                    } else { // Reuse consecutive sequence at same slot
                         HashEntry<K,V> lastRun = e;
                         int lastIdx = idx;
                         for (HashEntry<K,V> last = next;
@@ -574,21 +550,22 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
                 HashEntry<K,V> f; // to recheck first below
                 if (retries < 0) {
                     if (e == null) {
-                        if (node == null) // speculatively create node
+                        if (node == null) { // speculatively create node
                             node = new HashEntry<K,V>(hash, key, value, null);
+                        }
                         retries = 0;
                     }
-                    else if (key.equals(e.key))
+                    else if (key.equals(e.key)) {
                         retries = 0;
-                    else
+                    } else {
                         e = e.next;
+                    }
                 }
                 else if (++retries > MAX_SCAN_RETRIES) {
                     lock();
                     break;
                 }
-                else if ((retries & 1) == 0 &&
-                         (f = entryForHash(this, hash)) != first) {
+                else if ((retries & 1) == 0 && (f = entryForHash(this, hash)) != first) {
                     e = first = f; // re-traverse if entry changed
                     retries = -1;
                 }
@@ -611,10 +588,11 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
             while (!tryLock()) {
                 HashEntry<K,V> f;
                 if (retries < 0) {
-                    if (e == null || key.equals(e.key))
+                    if (e == null || key.equals(e.key)) {
                         retries = 0;
-                    else
+                    } else {
                         e = e.next;
+                    }
                 }
                 else if (++retries > MAX_SCAN_RETRIES) {
                     lock();
@@ -647,10 +625,11 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
                         (e.hash == hash && key.equals(k))) {
                         V v = e.value;
                         if (value == null || value == v || value.equals(v)) {
-                            if (pred == null)
+                            if (pred == null) {
                                 setEntryAt(tab, index, next);
-                            else
+                            } else {
                                 pred.setNext(next);
+                            }
                             ++modCount;
                             --count;
                             oldValue = v;
@@ -716,8 +695,9 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
             lock();
             try {
                 HashEntry<K,V>[] tab = table;
-                for (int i = 0; i < tab.length ; i++)
+                for (int i = 0; i < tab.length ; i++) {
                     setEntryAt(tab, i, null);
+                }
                 ++modCount;
                 count = 0;
             } finally {
@@ -764,10 +744,10 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
             if ((seg = (Segment<K,V>)UNSAFE.getObjectVolatile(ss, u))
                 == null) { // recheck
                 Segment<K,V> s = new Segment<K,V>(lf, threshold, tab);
-                while ((seg = (Segment<K,V>)UNSAFE.getObjectVolatile(ss, u))
-                       == null) {
-                    if (UNSAFE.compareAndSwapObject(ss, u, null, seg = s))
+                while ((seg = (Segment<K,V>)UNSAFE.getObjectVolatile(ss, u)) == null) {
+                    if (UNSAFE.compareAndSwapObject(ss, u, null, seg = s)) {
                         break;
+                    }
                 }
             }
         }
@@ -817,10 +797,12 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
     @SuppressWarnings("unchecked")
     public Jdk7ConcurrentHashMap(int initialCapacity,
                              float loadFactor, int concurrencyLevel) {
-        if (!(loadFactor > 0) || initialCapacity < 0 || concurrencyLevel <= 0)
+        if (!(loadFactor > 0) || initialCapacity < 0 || concurrencyLevel <= 0) {
             throw new IllegalArgumentException();
-        if (concurrencyLevel > MAX_SEGMENTS)
+        }
+        if (concurrencyLevel > MAX_SEGMENTS) {
             concurrencyLevel = MAX_SEGMENTS;
+        }
         // Find power-of-two sizes best matching arguments
         int sshift = 0;
         int ssize = 1;
@@ -830,14 +812,17 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
         }
         this.segmentShift = 32 - sshift;
         this.segmentMask = ssize - 1;
-        if (initialCapacity > MAXIMUM_CAPACITY)
+        if (initialCapacity > MAXIMUM_CAPACITY) {
             initialCapacity = MAXIMUM_CAPACITY;
+        }
         int c = initialCapacity / ssize;
-        if (c * ssize < initialCapacity)
+        if (c * ssize < initialCapacity) {
             ++c;
+        }
         int cap = MIN_SEGMENT_TABLE_CAPACITY;
-        while (cap < c)
+        while (cap < c) {
             cap <<= 1;
+        }
         // create segments and segments[0]
         Segment<K,V> s0 =
             new Segment<K,V>(loadFactor, (int)(cap * loadFactor),
@@ -906,6 +891,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *
      * @return {@code true} if this map contains no key-value mappings
      */
+    @Override
     public boolean isEmpty() {
         /*
          * Sum per-segment modCounts to avoid mis-reporting when
@@ -921,8 +907,9 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
         for (int j = 0; j < segments.length; ++j) {
             Segment<K,V> seg = segmentAt(segments, j);
             if (seg != null) {
-                if (seg.count != 0)
+                if (seg.count != 0) {
                     return false;
+                }
                 sum += seg.modCount;
             }
         }
@@ -930,13 +917,15 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
             for (int j = 0; j < segments.length; ++j) {
                 Segment<K,V> seg = segmentAt(segments, j);
                 if (seg != null) {
-                    if (seg.count != 0)
+                    if (seg.count != 0) {
                         return false;
+                    }
                     sum -= seg.modCount;
                 }
             }
-            if (sum != 0L)
+            if (sum != 0L) {
                 return false;
+            }
         }
         return true;
     }
@@ -948,6 +937,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *
      * @return the number of key-value mappings in this map
      */
+    @Override
     public int size() {
         // Try a few times to get accurate count. On failure due to
         // continuous async changes in table, resort to locking.
@@ -960,8 +950,9 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
         try {
             for (;;) {
                 if (retries++ == RETRIES_BEFORE_LOCK) {
-                    for (int j = 0; j < segments.length; ++j)
+                    for (int j = 0; j < segments.length; ++j) {
                         ensureSegment(j).lock(); // force creation
+                    }
                 }
                 sum = 0L;
                 size = 0;
@@ -971,18 +962,21 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
                     if (seg != null) {
                         sum += seg.modCount;
                         int c = seg.count;
-                        if (c < 0 || (size += c) < 0)
+                        if (c < 0 || (size += c) < 0) {
                             overflow = true;
+                        }
                     }
                 }
-                if (sum == last)
+                if (sum == last) {
                     break;
+                }
                 last = sum;
             }
         } finally {
             if (retries > RETRIES_BEFORE_LOCK) {
-                for (int j = 0; j < segments.length; ++j)
+                for (int j = 0; j < segments.length; ++j) {
                     segmentAt(segments, j).unlock();
+                }
             }
         }
         return overflow ? Integer.MAX_VALUE : size;
@@ -1005,8 +999,8 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
         HashEntry<K,V>[] tab;
         int h = hash(key);
         long u = (((h >>> segmentShift) & segmentMask) << SSHIFT) + SBASE;
-        if ((s = (Segment<K,V>)UNSAFE.getObjectVolatile(segments, u)) != null &&
-            (tab = s.table) != null) {
+        if ((s = (Segment<K,V>)UNSAFE.getObjectVolatile(segments, u)) != null && (tab = s.table) != null) {
+
             for (HashEntry<K,V> e = (HashEntry<K,V>) UNSAFE.getObjectVolatile(tab, ((long)(((tab.length - 1) & h)) << TSHIFT) + TBASE); e != null; e = e.next) {
                 K k;
                 if ((k = e.key) == key || (e.hash == h && key.equals(k))) {
@@ -1026,6 +1020,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *         {@code equals} method; {@code false} otherwise.
      * @throws NullPointerException if the specified key is null
      */
+    @Override
     @SuppressWarnings("unchecked")
     public boolean containsKey(Object key) {
         Segment<K,V> s; // same as get() except no need for volatile value read
@@ -1038,8 +1033,9 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
                      (tab, ((long)(((tab.length - 1) & h)) << TSHIFT) + TBASE);
                  e != null; e = e.next) {
                 K k;
-                if ((k = e.key) == key || (e.hash == h && key.equals(k)))
+                if ((k = e.key) == key || (e.hash == h && key.equals(k))) {
                     return true;
+                }
             }
         }
         return false;
@@ -1056,10 +1052,12 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *         specified value
      * @throws NullPointerException if the specified value is null
      */
+    @Override
     public boolean containsValue(Object value) {
         // Same idea as size()
-        if (value == null)
+        if (value == null) {
             throw new NullPointerException();
+        }
         final Segment<K,V>[] segments = this.segments;
         boolean found = false;
         long last = 0;
@@ -1089,14 +1087,16 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
                         sum += seg.modCount;
                     }
                 }
-                if (retries > 0 && sum == last)
+                if (retries > 0 && sum == last) {
                     break;
+                }
                 last = sum;
             }
         } finally {
             if (retries > RETRIES_BEFORE_LOCK) {
-                for (int j = 0; j < segments.length; ++j)
+                for (int j = 0; j < segments.length; ++j) {
                     segmentAt(segments, j).unlock();
+                }
             }
         }
         return found;
@@ -1141,8 +1141,10 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
         if (value == null) {
             throw new NullPointerException();
         }
+
         int hash = hash(key);
         int j = (hash >>> segmentShift) & segmentMask;
+        //
         if ((s = (Segment<K,V>)UNSAFE.getObject          // nonvolatile; recheck
              (segments, (j << SSHIFT) + SBASE)) == null) //  in ensureSegment
         {
@@ -1158,16 +1160,19 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *         or {@code null} if there was no mapping for the key
      * @throws NullPointerException if the specified key or value is null
      */
+    @Override
     @SuppressWarnings("unchecked")
     public V putIfAbsent(K key, V value) {
         Segment<K,V> s;
-        if (value == null)
+        if (value == null) {
             throw new NullPointerException();
+        }
         int hash = hash(key);
         int j = (hash >>> segmentShift) & segmentMask;
         if ((s = (Segment<K,V>)UNSAFE.getObject
-             (segments, (j << SSHIFT) + SBASE)) == null)
+             (segments, (j << SSHIFT) + SBASE)) == null) {
             s = ensureSegment(j);
+        }
         return s.put(key, hash, value, true);
     }
 
@@ -1178,9 +1183,11 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *
      * @param m mappings to be stored in this map
      */
+    @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        for (Map.Entry<? extends K, ? extends V> e : m.entrySet())
+        for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
             put(e.getKey(), e.getValue());
+        }
     }
 
     /**
@@ -1192,6 +1199,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *         {@code null} if there was no mapping for {@code key}
      * @throws NullPointerException if the specified key is null
      */
+    @Override
     public V remove(Object key) {
         int hash = hash(key);
         Segment<K,V> s = segmentForHash(hash);
@@ -1203,6 +1211,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *
      * @throws NullPointerException if the specified key is null
      */
+    @Override
     public boolean remove(Object key, Object value) {
         int hash = hash(key);
         Segment<K,V> s;
@@ -1215,10 +1224,12 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *
      * @throws NullPointerException if any of the arguments are null
      */
+    @Override
     public boolean replace(K key, V oldValue, V newValue) {
         int hash = hash(key);
-        if (oldValue == null || newValue == null)
+        if (oldValue == null || newValue == null) {
             throw new NullPointerException();
+        }
         Segment<K,V> s = segmentForHash(hash);
         return s != null && s.replace(key, hash, oldValue, newValue);
     }
@@ -1230,10 +1241,12 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      *         or {@code null} if there was no mapping for the key
      * @throws NullPointerException if the specified key or value is null
      */
+    @Override
     public V replace(K key, V value) {
         int hash = hash(key);
-        if (value == null)
+        if (value == null) {
             throw new NullPointerException();
+        }
         Segment<K,V> s = segmentForHash(hash);
         return s == null ? null : s.replace(key, hash, value);
     }
@@ -1241,12 +1254,14 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
     /**
      * Removes all of the mappings from this map.
      */
+    @Override
     public void clear() {
         final Segment<K,V>[] segments = this.segments;
         for (int j = 0; j < segments.length; ++j) {
             Segment<K,V> s = segmentAt(segments, j);
-            if (s != null)
+            if (s != null) {
                 s.clear();
+            }
         }
     }
 
@@ -1309,6 +1324,7 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      * construction of the iterator, and may (but is not guaranteed to)
      * reflect any modifications subsequent to construction.
      */
+    @Override
     public Set<Map.Entry<K,V>> entrySet() {
         Set<Map.Entry<K,V>> es = entrySet;
         return (es != null) ? es : (entrySet = new EntrySet());
@@ -1362,21 +1378,25 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
                 }
                 else if (nextSegmentIndex >= 0) {
                     Segment<K,V> seg = segmentAt(segments, nextSegmentIndex--);
-                    if (seg != null && (currentTable = seg.table) != null)
+                    if (seg != null && (currentTable = seg.table) != null) {
                         nextTableIndex = currentTable.length - 1;
+                    }
                 }
-                else
+                else {
                     break;
+                }
             }
         }
 
         final HashEntry<K,V> nextEntry() {
             HashEntry<K,V> e = nextEntry;
-            if (e == null)
+            if (e == null) {
                 throw new NoSuchElementException();
+            }
             lastReturned = e; // cannot assign until after null check
-            if ((nextEntry = e.next) == null)
+            if ((nextEntry = e.next) == null) {
                 advance();
+            }
             return e;
         }
 
@@ -1384,8 +1404,9 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
         public final boolean hasMoreElements() { return nextEntry != null; }
 
         public final void remove() {
-            if (lastReturned == null)
+            if (lastReturned == null) {
                 throw new IllegalStateException();
+            }
             Jdk7ConcurrentHashMap.this.remove(lastReturned.key);
             lastReturned = null;
         }
@@ -1427,8 +1448,11 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
          * removed in which case the put will re-establish). We do not
          * and cannot guarantee more.
          */
+        @Override
         public V setValue(V value) {
-            if (value == null) throw new NullPointerException();
+            if (value == null) {
+                throw new NullPointerException();
+            }
             V v = super.setValue(value);
             Jdk7ConcurrentHashMap.this.put(getKey(), value);
             return v;
@@ -1525,8 +1549,9 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
      */
     private void writeObject(java.io.ObjectOutputStream s) throws IOException {
         // force all segments for serialization compatibility
-        for (int k = 0; k < segments.length; ++k)
+        for (int k = 0; k < segments.length; ++k) {
             ensureSegment(k);
+        }
         s.defaultWriteObject();
 
         final Segment<K,V>[] segments = this.segments;
@@ -1565,8 +1590,10 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
         final int ssize = oisSegments.length;
         if (ssize < 1 || ssize > MAX_SEGMENTS
             || (ssize & (ssize-1)) != 0 )  // ssize not power of two
+        {
             throw new java.io.InvalidObjectException("Bad number of segments:"
                                                      + ssize);
+        }
         int sshift = 0, ssizeTmp = ssize;
         while (ssizeTmp > 1) {
             ++sshift;
@@ -1594,8 +1621,9 @@ public class Jdk7ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Co
         for (;;) {
             K key = (K) s.readObject();
             V value = (V) s.readObject();
-            if (key == null)
+            if (key == null) {
                 break;
+            }
             put(key, value);
         }
     }
