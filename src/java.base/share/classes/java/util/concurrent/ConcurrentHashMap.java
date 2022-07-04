@@ -509,24 +509,28 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * because the top two bits of 32bit hash fields are used for
      * control purposes.
      */
+    // 最大容量（最大能存这么多个键值对）
     private static final int MAXIMUM_CAPACITY = 1 << 30;
 
     /**
      * The default initial table capacity.  Must be a power of 2
      * (i.e., at least 1) and at most MAXIMUM_CAPACITY.
      */
+    // 默认容量
     private static final int DEFAULT_CAPACITY = 16;
 
     /**
      * The largest possible (non-power of two) array size.
      * Needed by toArray and related methods.
      */
+    // 数组的最大长度（减8是用于存数组的额外信息）
     static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     /**
      * The default concurrency level for this table. Unused but
      * defined for compatibility with previous versions of this class.
      */
+    // 默认的并行度，为了兼容jdk1.7版本的Segment
     private static final int DEFAULT_CONCURRENCY_LEVEL = 16;
 
     /**
@@ -727,11 +731,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 return c;
             if ((ts = c.getGenericInterfaces()) != null) {
                 for (Type t : ts) {
-                    if ((t instanceof ParameterizedType) &&
-                        ((p = (ParameterizedType)t).getRawType() ==
-                         Comparable.class) &&
-                        (as = p.getActualTypeArguments()) != null &&
-                        as.length == 1 && as[0] == c) // type arg is c
+                    if ((t instanceof ParameterizedType) && ((p = (ParameterizedType)t).getRawType() == Comparable.class) && (as = p.getActualTypeArguments()) != null && as.length == 1 && as[0] == c) // type arg is c
                         return c;
                 }
             }
@@ -745,8 +745,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      */
     @SuppressWarnings({"rawtypes","unchecked"}) // for cast to Comparable
     static int compareComparables(Class<?> kc, Object k, Object x) {
-        return (x == null || x.getClass() != kc ? 0 :
-                ((Comparable)k).compareTo(x));
+        return (x == null || x.getClass() != kc ? 0 : ((Comparable)k).compareTo(x));
     }
 
     /* ---------------- Table element access -------------- */
@@ -764,7 +763,6 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * Note that calls to setTabAt always occur within locked regions,
      * and so require only release ordering.
      */
-
     @SuppressWarnings("unchecked")
     static final <K,V> Node<K,V> tabAt(Node<K,V>[] tab, int i) {
         return (Node<K,V>)U.getObjectAcquire(tab, ((long)i << ASHIFT) + ABASE);
@@ -806,6 +804,10 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * creation, or 0 for default. After initialization, holds the
      * next element count value upon which to resize the table.
      */
+    // 默认 0
+    // -1    正在初始化
+    // -n    正在扩容
+    // 正数   当前数组要扩容时的阈值
     private transient volatile int sizeCtl;
 
     /**
@@ -916,9 +918,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      */
     public int size() {
         long n = sumCount();
-        return ((n < 0L) ? 0 :
-                (n > (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE :
-                (int)n);
+        return ((n < 0L) ? 0 : (n > (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int)n);
     }
 
     /**
@@ -1029,13 +1029,12 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         if (key == null || value == null) {
             // key不能为null，估计是作者不喜欢null为key的原因
             // value不能为null，
-
             throw new NullPointerException();
         }
         //
         int hash = spread(key.hashCode());
         int binCount = 0;
-        for (Node<K,V>[] tab = table;;) {
+        for (Node<K,V>[] tab = table;;) { // 死循环
             Node<K,V> f;
             int n; // tab.length
             int i; //
@@ -1043,7 +1042,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
             K fk;
             V fv;
             if (tab == null || (n = tab.length) == 0) {
-                //
+                // 初始化数组
                 tab = initTable();
             }
             else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
@@ -2317,12 +2316,20 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * Initializes table, using the size recorded in sizeCtl.
      */
     private final Node<K,V>[] initTable() {
-        Node<K,V>[] tab; int sc;
+        Node<K,V>[] tab;
+        int sc;
         while ((tab = table) == null || tab.length == 0) {
+            // 有线程正在初始化，当前线程 运行状态转为就绪状态
             if ((sc = sizeCtl) < 0) {
                 Thread.yield(); // lost initialization race; just spin
             }
+            // SIZECTL和sc一样把SIZECTL赋值为-1
+            // this
+            // SIZECTL = U.objectFieldOffset(ConcurrentHashMap.class, "sizeCtl")
+            //
+            //
             else if (U.compareAndSetInt(this, SIZECTL, sc, -1)) {
+                // 后续进来的线程都会进入前面都逻辑 if ((sc = sizeCtl) < 0) {
                 try {
                     if ((tab = table) == null || tab.length == 0) {
                         int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
@@ -6391,22 +6398,18 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
     private static final int ASHIFT;
 
     static {
-        SIZECTL = U.objectFieldOffset
-            (ConcurrentHashMap.class, "sizeCtl");
-        TRANSFERINDEX = U.objectFieldOffset
-            (ConcurrentHashMap.class, "transferIndex");
-        BASECOUNT = U.objectFieldOffset
-            (ConcurrentHashMap.class, "baseCount");
-        CELLSBUSY = U.objectFieldOffset
-            (ConcurrentHashMap.class, "cellsBusy");
+        SIZECTL = U.objectFieldOffset(ConcurrentHashMap.class, "sizeCtl");
+        TRANSFERINDEX = U.objectFieldOffset(ConcurrentHashMap.class, "transferIndex");
+        BASECOUNT = U.objectFieldOffset(ConcurrentHashMap.class, "baseCount");
+        CELLSBUSY = U.objectFieldOffset(ConcurrentHashMap.class, "cellsBusy");
 
-        CELLVALUE = U.objectFieldOffset
-            (CounterCell.class, "value");
+        CELLVALUE = U.objectFieldOffset(CounterCell.class, "value");
 
         ABASE = U.arrayBaseOffset(Node[].class);
         int scale = U.arrayIndexScale(Node[].class);
-        if ((scale & (scale - 1)) != 0)
+        if ((scale & (scale - 1)) != 0) {
             throw new ExceptionInInitializerError("array index scale not a power of two");
+        }
         ASHIFT = 31 - Integer.numberOfLeadingZeros(scale);
 
         // Reduce the risk of rare disastrous classloading in first call to

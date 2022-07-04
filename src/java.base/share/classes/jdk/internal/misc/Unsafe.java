@@ -776,11 +776,8 @@ public final class Unsafe {
      *
      * @since 1.7
      */
-    public void copyMemory(Object srcBase, long srcOffset,
-                           Object destBase, long destOffset,
-                           long bytes) {
+    public void copyMemory(Object srcBase, long srcOffset, Object destBase, long destOffset, long bytes) {
         copyMemoryChecks(srcBase, srcOffset, destBase, destOffset, bytes);
-
         if (bytes == 0) {
             return;
         }
@@ -807,9 +804,7 @@ public final class Unsafe {
      *         go undetected, which will lead to unpredictable
      *         behavior)
      */
-    private void copyMemoryChecks(Object srcBase, long srcOffset,
-                                  Object destBase, long destOffset,
-                                  long bytes) {
+    private void copyMemoryChecks(Object srcBase, long srcOffset, Object destBase, long destOffset, long bytes) {
         checkSize(bytes);
         checkPrimitivePointer(srcBase, srcOffset);
         checkPrimitivePointer(destBase, destOffset);
@@ -837,9 +832,7 @@ public final class Unsafe {
      *
      * @since 9
      */
-    public void copySwapMemory(Object srcBase, long srcOffset,
-                               Object destBase, long destOffset,
-                               long bytes, long elemSize) {
+    public void copySwapMemory(Object srcBase, long srcOffset, Object destBase, long destOffset, long bytes, long elemSize) {
         copySwapMemoryChecks(srcBase, srcOffset, destBase, destOffset, bytes, elemSize);
 
         if (bytes == 0) {
@@ -849,9 +842,7 @@ public final class Unsafe {
         copySwapMemory0(srcBase, srcOffset, destBase, destOffset, bytes, elemSize);
     }
 
-    private void copySwapMemoryChecks(Object srcBase, long srcOffset,
-                                      Object destBase, long destOffset,
-                                      long bytes, long elemSize) {
+    private void copySwapMemoryChecks(Object srcBase, long srcOffset, Object destBase, long destOffset, long bytes, long elemSize) {
         checkSize(bytes);
 
         if (elemSize != 2 && elemSize != 4 && elemSize != 8) {
@@ -1062,40 +1053,31 @@ public final class Unsafe {
 
 
     /** The value of {@code arrayBaseOffset(boolean[].class)} */
-    public static final int ARRAY_BOOLEAN_BASE_OFFSET
-            = theUnsafe.arrayBaseOffset(boolean[].class);
+    public static final int ARRAY_BOOLEAN_BASE_OFFSET = theUnsafe.arrayBaseOffset(boolean[].class);
 
     /** The value of {@code arrayBaseOffset(byte[].class)} */
-    public static final int ARRAY_BYTE_BASE_OFFSET
-            = theUnsafe.arrayBaseOffset(byte[].class);
+    public static final int ARRAY_BYTE_BASE_OFFSET = theUnsafe.arrayBaseOffset(byte[].class);
 
     /** The value of {@code arrayBaseOffset(short[].class)} */
-    public static final int ARRAY_SHORT_BASE_OFFSET
-            = theUnsafe.arrayBaseOffset(short[].class);
+    public static final int ARRAY_SHORT_BASE_OFFSET = theUnsafe.arrayBaseOffset(short[].class);
 
     /** The value of {@code arrayBaseOffset(char[].class)} */
-    public static final int ARRAY_CHAR_BASE_OFFSET
-            = theUnsafe.arrayBaseOffset(char[].class);
+    public static final int ARRAY_CHAR_BASE_OFFSET = theUnsafe.arrayBaseOffset(char[].class);
 
     /** The value of {@code arrayBaseOffset(int[].class)} */
-    public static final int ARRAY_INT_BASE_OFFSET
-            = theUnsafe.arrayBaseOffset(int[].class);
+    public static final int ARRAY_INT_BASE_OFFSET = theUnsafe.arrayBaseOffset(int[].class);
 
     /** The value of {@code arrayBaseOffset(long[].class)} */
-    public static final int ARRAY_LONG_BASE_OFFSET
-            = theUnsafe.arrayBaseOffset(long[].class);
+    public static final int ARRAY_LONG_BASE_OFFSET = theUnsafe.arrayBaseOffset(long[].class);
 
     /** The value of {@code arrayBaseOffset(float[].class)} */
-    public static final int ARRAY_FLOAT_BASE_OFFSET
-            = theUnsafe.arrayBaseOffset(float[].class);
+    public static final int ARRAY_FLOAT_BASE_OFFSET = theUnsafe.arrayBaseOffset(float[].class);
 
     /** The value of {@code arrayBaseOffset(double[].class)} */
-    public static final int ARRAY_DOUBLE_BASE_OFFSET
-            = theUnsafe.arrayBaseOffset(double[].class);
+    public static final int ARRAY_DOUBLE_BASE_OFFSET = theUnsafe.arrayBaseOffset(double[].class);
 
     /** The value of {@code arrayBaseOffset(Object[].class)} */
-    public static final int ARRAY_OBJECT_BASE_OFFSET
-            = theUnsafe.arrayBaseOffset(Object[].class);
+    public static final int ARRAY_OBJECT_BASE_OFFSET = theUnsafe.arrayBaseOffset(Object[].class);
 
     /**
      * Reports the scale factor for addressing elements in the storage
@@ -1118,40 +1100,31 @@ public final class Unsafe {
 
 
     /** The value of {@code arrayIndexScale(boolean[].class)} */
-    public static final int ARRAY_BOOLEAN_INDEX_SCALE
-            = theUnsafe.arrayIndexScale(boolean[].class);
+    public static final int ARRAY_BOOLEAN_INDEX_SCALE = theUnsafe.arrayIndexScale(boolean[].class);
 
     /** The value of {@code arrayIndexScale(byte[].class)} */
-    public static final int ARRAY_BYTE_INDEX_SCALE
-            = theUnsafe.arrayIndexScale(byte[].class);
+    public static final int ARRAY_BYTE_INDEX_SCALE = theUnsafe.arrayIndexScale(byte[].class);
 
     /** The value of {@code arrayIndexScale(short[].class)} */
-    public static final int ARRAY_SHORT_INDEX_SCALE
-            = theUnsafe.arrayIndexScale(short[].class);
+    public static final int ARRAY_SHORT_INDEX_SCALE = theUnsafe.arrayIndexScale(short[].class);
 
     /** The value of {@code arrayIndexScale(char[].class)} */
-    public static final int ARRAY_CHAR_INDEX_SCALE
-            = theUnsafe.arrayIndexScale(char[].class);
+    public static final int ARRAY_CHAR_INDEX_SCALE = theUnsafe.arrayIndexScale(char[].class);
 
     /** The value of {@code arrayIndexScale(int[].class)} */
-    public static final int ARRAY_INT_INDEX_SCALE
-            = theUnsafe.arrayIndexScale(int[].class);
+    public static final int ARRAY_INT_INDEX_SCALE = theUnsafe.arrayIndexScale(int[].class);
 
     /** The value of {@code arrayIndexScale(long[].class)} */
-    public static final int ARRAY_LONG_INDEX_SCALE
-            = theUnsafe.arrayIndexScale(long[].class);
+    public static final int ARRAY_LONG_INDEX_SCALE = theUnsafe.arrayIndexScale(long[].class);
 
     /** The value of {@code arrayIndexScale(float[].class)} */
-    public static final int ARRAY_FLOAT_INDEX_SCALE
-            = theUnsafe.arrayIndexScale(float[].class);
+    public static final int ARRAY_FLOAT_INDEX_SCALE = theUnsafe.arrayIndexScale(float[].class);
 
     /** The value of {@code arrayIndexScale(double[].class)} */
-    public static final int ARRAY_DOUBLE_INDEX_SCALE
-            = theUnsafe.arrayIndexScale(double[].class);
+    public static final int ARRAY_DOUBLE_INDEX_SCALE = theUnsafe.arrayIndexScale(double[].class);
 
     /** The value of {@code arrayIndexScale(Object[].class)} */
-    public static final int ARRAY_OBJECT_INDEX_SCALE
-            = theUnsafe.arrayIndexScale(Object[].class);
+    public static final int ARRAY_OBJECT_INDEX_SCALE = theUnsafe.arrayIndexScale(Object[].class);
 
     /**
      * Reports the size in bytes of a native pointer, as stored via {@link
@@ -1179,9 +1152,7 @@ public final class Unsafe {
      * Tells the VM to define a class, without security checks.  By default, the
      * class loader and protection domain come from the caller's class.
      */
-    public Class<?> defineClass(String name, byte[] b, int off, int len,
-                                ClassLoader loader,
-                                ProtectionDomain protectionDomain) {
+    public Class<?> defineClass(String name, byte[] b, int off, int len, ClassLoader loader, ProtectionDomain protectionDomain) {
         if (b == null) {
             throw new NullPointerException();
         }
@@ -1192,9 +1163,7 @@ public final class Unsafe {
         return defineClass0(name, b, off, len, loader, protectionDomain);
     }
 
-    public native Class<?> defineClass0(String name, byte[] b, int off, int len,
-                                        ClassLoader loader,
-                                        ProtectionDomain protectionDomain);
+    public native Class<?> defineClass0(String name, byte[] b, int off, int len, ClassLoader loader, ProtectionDomain protectionDomain);
 
     /**
      * Defines a class but does not make it known to the class loader or system dictionary.
@@ -1297,54 +1266,38 @@ public final class Unsafe {
      * @return {@code true} if successful
      */
     @HotSpotIntrinsicCandidate
-    public final native boolean compareAndSetObject(Object o, long offset,
-                                                    Object expected,
-                                                    Object x);
+    public final native boolean compareAndSetObject(Object o, long offset, Object expected, Object x);
 
     @HotSpotIntrinsicCandidate
-    public final native Object compareAndExchangeObject(Object o, long offset,
-                                                        Object expected,
-                                                        Object x);
+    public final native Object compareAndExchangeObject(Object o, long offset, Object expected, Object x);
 
     @HotSpotIntrinsicCandidate
-    public final Object compareAndExchangeObjectAcquire(Object o, long offset,
-                                                               Object expected,
-                                                               Object x) {
+    public final Object compareAndExchangeObjectAcquire(Object o, long offset, Object expected, Object x) {
         return compareAndExchangeObject(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final Object compareAndExchangeObjectRelease(Object o, long offset,
-                                                               Object expected,
-                                                               Object x) {
+    public final Object compareAndExchangeObjectRelease(Object o, long offset, Object expected, Object x) {
         return compareAndExchangeObject(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetObjectPlain(Object o, long offset,
-                                                      Object expected,
-                                                      Object x) {
+    public final boolean weakCompareAndSetObjectPlain(Object o, long offset, Object expected, Object x) {
         return compareAndSetObject(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetObjectAcquire(Object o, long offset,
-                                                        Object expected,
-                                                        Object x) {
+    public final boolean weakCompareAndSetObjectAcquire(Object o, long offset, Object expected, Object x) {
         return compareAndSetObject(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetObjectRelease(Object o, long offset,
-                                                        Object expected,
-                                                        Object x) {
+    public final boolean weakCompareAndSetObjectRelease(Object o, long offset, Object expected, Object x) {
         return compareAndSetObject(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetObject(Object o, long offset,
-                                                 Object expected,
-                                                 Object x) {
+    public final boolean weakCompareAndSetObject(Object o, long offset, Object expected, Object x) {
         return compareAndSetObject(o, offset, expected, x);
     }
 
@@ -1358,61 +1311,43 @@ public final class Unsafe {
      * @return {@code true} if successful
      */
     @HotSpotIntrinsicCandidate
-    public final native boolean compareAndSetInt(Object o, long offset,
-                                                 int expected,
-                                                 int x);
+    public final native boolean compareAndSetInt(Object o, long offset, int expected, int x);
 
     @HotSpotIntrinsicCandidate
-    public final native int compareAndExchangeInt(Object o, long offset,
-                                                  int expected,
-                                                  int x);
+    public final native int compareAndExchangeInt(Object o, long offset, int expected, int x);
 
     @HotSpotIntrinsicCandidate
-    public final int compareAndExchangeIntAcquire(Object o, long offset,
-                                                         int expected,
-                                                         int x) {
+    public final int compareAndExchangeIntAcquire(Object o, long offset, int expected, int x) {
         return compareAndExchangeInt(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final int compareAndExchangeIntRelease(Object o, long offset,
-                                                         int expected,
-                                                         int x) {
+    public final int compareAndExchangeIntRelease(Object o, long offset, int expected, int x) {
         return compareAndExchangeInt(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetIntPlain(Object o, long offset,
-                                                   int expected,
-                                                   int x) {
+    public final boolean weakCompareAndSetIntPlain(Object o, long offset, int expected, int x) {
         return compareAndSetInt(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetIntAcquire(Object o, long offset,
-                                                     int expected,
-                                                     int x) {
+    public final boolean weakCompareAndSetIntAcquire(Object o, long offset, int expected, int x) {
         return compareAndSetInt(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetIntRelease(Object o, long offset,
-                                                     int expected,
-                                                     int x) {
+    public final boolean weakCompareAndSetIntRelease(Object o, long offset, int expected, int x) {
         return compareAndSetInt(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetInt(Object o, long offset,
-                                              int expected,
-                                              int x) {
+    public final boolean weakCompareAndSetInt(Object o, long offset, int expected, int x) {
         return compareAndSetInt(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final byte compareAndExchangeByte(Object o, long offset,
-                                             byte expected,
-                                             byte x) {
+    public final byte compareAndExchangeByte(Object o, long offset, byte expected, byte x) {
         long wordOffset = offset & ~3;
         int shift = (int) (offset & 3) << 3;
         if (BE) {
@@ -1426,64 +1361,47 @@ public final class Unsafe {
             fullWord = getIntVolatile(o, wordOffset);
             if ((fullWord & mask) != maskedExpected)
                 return (byte) ((fullWord & mask) >> shift);
-        } while (!weakCompareAndSetInt(o, wordOffset,
-                                                fullWord, (fullWord & ~mask) | maskedX));
+        } while (!weakCompareAndSetInt(o, wordOffset, fullWord, (fullWord & ~mask) | maskedX));
         return expected;
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean compareAndSetByte(Object o, long offset,
-                                           byte expected,
-                                           byte x) {
+    public final boolean compareAndSetByte(Object o, long offset, byte expected, byte x) {
         return compareAndExchangeByte(o, offset, expected, x) == expected;
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetByte(Object o, long offset,
-                                               byte expected,
-                                               byte x) {
+    public final boolean weakCompareAndSetByte(Object o, long offset, byte expected, byte x) {
         return compareAndSetByte(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetByteAcquire(Object o, long offset,
-                                                      byte expected,
-                                                      byte x) {
+    public final boolean weakCompareAndSetByteAcquire(Object o, long offset, byte expected, byte x) {
         return weakCompareAndSetByte(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetByteRelease(Object o, long offset,
-                                                      byte expected,
-                                                      byte x) {
+    public final boolean weakCompareAndSetByteRelease(Object o, long offset, byte expected, byte x) {
         return weakCompareAndSetByte(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetBytePlain(Object o, long offset,
-                                                    byte expected,
-                                                    byte x) {
+    public final boolean weakCompareAndSetBytePlain(Object o, long offset, byte expected, byte x) {
         return weakCompareAndSetByte(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final byte compareAndExchangeByteAcquire(Object o, long offset,
-                                                    byte expected,
-                                                    byte x) {
+    public final byte compareAndExchangeByteAcquire(Object o, long offset, byte expected, byte x) {
         return compareAndExchangeByte(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final byte compareAndExchangeByteRelease(Object o, long offset,
-                                                    byte expected,
-                                                    byte x) {
+    public final byte compareAndExchangeByteRelease(Object o, long offset, byte expected, byte x) {
         return compareAndExchangeByte(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final short compareAndExchangeShort(Object o, long offset,
-                                               short expected,
-                                               short x) {
+    public final short compareAndExchangeShort(Object o, long offset, short expected, short x) {
         if ((offset & 3) == 3) {
             throw new IllegalArgumentException("Update spans the word, not supported");
         }
@@ -1501,58 +1419,43 @@ public final class Unsafe {
             if ((fullWord & mask) != maskedExpected) {
                 return (short) ((fullWord & mask) >> shift);
             }
-        } while (!weakCompareAndSetInt(o, wordOffset,
-                                                fullWord, (fullWord & ~mask) | maskedX));
+        } while (!weakCompareAndSetInt(o, wordOffset, fullWord, (fullWord & ~mask) | maskedX));
         return expected;
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean compareAndSetShort(Object o, long offset,
-                                            short expected,
-                                            short x) {
+    public final boolean compareAndSetShort(Object o, long offset, short expected, short x) {
         return compareAndExchangeShort(o, offset, expected, x) == expected;
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetShort(Object o, long offset,
-                                                short expected,
-                                                short x) {
+    public final boolean weakCompareAndSetShort(Object o, long offset, short expected, short x) {
         return compareAndSetShort(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetShortAcquire(Object o, long offset,
-                                                       short expected,
-                                                       short x) {
+    public final boolean weakCompareAndSetShortAcquire(Object o, long offset, short expected, short x) {
         return weakCompareAndSetShort(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetShortRelease(Object o, long offset,
-                                                       short expected,
-                                                       short x) {
+    public final boolean weakCompareAndSetShortRelease(Object o, long offset, short expected, short x) {
         return weakCompareAndSetShort(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final boolean weakCompareAndSetShortPlain(Object o, long offset,
-                                                     short expected,
-                                                     short x) {
+    public final boolean weakCompareAndSetShortPlain(Object o, long offset, short expected, short x) {
         return weakCompareAndSetShort(o, offset, expected, x);
     }
 
 
     @HotSpotIntrinsicCandidate
-    public final short compareAndExchangeShortAcquire(Object o, long offset,
-                                                     short expected,
-                                                     short x) {
+    public final short compareAndExchangeShortAcquire(Object o, long offset, short expected, short x) {
         return compareAndExchangeShort(o, offset, expected, x);
     }
 
     @HotSpotIntrinsicCandidate
-    public final short compareAndExchangeShortRelease(Object o, long offset,
-                                                    short expected,
-                                                    short x) {
+    public final short compareAndExchangeShortRelease(Object o, long offset, short expected, short x) {
         return compareAndExchangeShort(o, offset, expected, x);
     }
 
@@ -1567,44 +1470,32 @@ public final class Unsafe {
     }
 
     @ForceInline
-    public final boolean compareAndSetChar(Object o, long offset,
-                                           char expected,
-                                           char x) {
+    public final boolean compareAndSetChar(Object o, long offset, char expected, char x) {
         return compareAndSetShort(o, offset, c2s(expected), c2s(x));
     }
 
     @ForceInline
-    public final char compareAndExchangeChar(Object o, long offset,
-                                             char expected,
-                                             char x) {
+    public final char compareAndExchangeChar(Object o, long offset, char expected, char x) {
         return s2c(compareAndExchangeShort(o, offset, c2s(expected), c2s(x)));
     }
 
     @ForceInline
-    public final char compareAndExchangeCharAcquire(Object o, long offset,
-                                            char expected,
-                                            char x) {
+    public final char compareAndExchangeCharAcquire(Object o, long offset, char expected, char x) {
         return s2c(compareAndExchangeShortAcquire(o, offset, c2s(expected), c2s(x)));
     }
 
     @ForceInline
-    public final char compareAndExchangeCharRelease(Object o, long offset,
-                                            char expected,
-                                            char x) {
+    public final char compareAndExchangeCharRelease(Object o, long offset, char expected, char x) {
         return s2c(compareAndExchangeShortRelease(o, offset, c2s(expected), c2s(x)));
     }
 
     @ForceInline
-    public final boolean weakCompareAndSetChar(Object o, long offset,
-                                               char expected,
-                                               char x) {
+    public final boolean weakCompareAndSetChar(Object o, long offset, char expected, char x) {
         return weakCompareAndSetShort(o, offset, c2s(expected), c2s(x));
     }
 
     @ForceInline
-    public final boolean weakCompareAndSetCharAcquire(Object o, long offset,
-                                                      char expected,
-                                                      char x) {
+    public final boolean weakCompareAndSetCharAcquire(Object o, long offset, char expected, char x) {
         return weakCompareAndSetShortAcquire(o, offset, c2s(expected), c2s(x));
     }
 
