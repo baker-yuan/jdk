@@ -12,7 +12,9 @@ public class ConcurrentHashMapTest {
         concurrentHashMap.put("k", "v");
         System.out.println(concurrentHashMap);
 
-        // Jdk7ConcurrentHashMap<String, Object> jdk7ConcurrentHashMap = new Jdk7ConcurrentHashMap<>();
-        // System.out.println(jdk7ConcurrentHashMap);
+        Jdk7ConcurrentHashMap<String, Object> jdk7ConcurrentHashMap = new Jdk7ConcurrentHashMap<>();
+        jdk7ConcurrentHashMap.put("k", "v");
+        Object k = jdk7ConcurrentHashMap.get("k");
+        System.out.println(jdk7ConcurrentHashMap);
     }
 }
