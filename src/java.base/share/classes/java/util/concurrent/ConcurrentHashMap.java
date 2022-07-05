@@ -263,6 +263,7 @@ import jdk.internal.misc.Unsafe;
  */
 
 /**
+ * https://blog.csdn.net/qq_18300037/article/details/123795776
  * https://blog.csdn.net/weixin_35833012/article/details/88083678
  */
 public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements ConcurrentMap<K,V>, Serializable {
@@ -708,6 +709,9 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * never be used in index calculations because of table bounds.
      */
     static final int spread(int h) {
+        // h为key值得hash值，将高16位也参与运算，然后与int最大值进行&运算(效果为将值变为正数，其他位置不变)
+        // HASH_BITS为int最大值，最高位为0
+        // HashMap中没有处理为正数的步骤，这里负数有其它含义，查看节点类型
         return (h ^ (h >>> 16)) & HASH_BITS;
     }
 
@@ -804,10 +808,14 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * creation, or 0 for default. After initialization, holds the
      * next element count value upon which to resize the table.
      */
-    // 默认 0
-    // -1    正在初始化
+
+    // 1、负数
+    // -1    容器进行初始化
     // -n    正在扩容
-    // 正数   当前数组要扩容时的阈值
+    // 2、正数
+    // 0           未初始化，需要进行初始化
+    // 其余正数     当前容器的大小
+    // 代表着初始化资源或者扩容资源的锁，必须要获取到该锁才允许进行初始化或者扩容的操作
     private transient volatile int sizeCtl;
 
     /**
@@ -1031,7 +1039,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
             // value不能为null，
             throw new NullPointerException();
         }
-        //
+        // 获取hash值
         int hash = spread(key.hashCode());
         int binCount = 0;
         for (Node<K,V>[] tab = table;;) { // 死循环
@@ -1042,15 +1050,19 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
             K fk;
             V fv;
             if (tab == null || (n = tab.length) == 0) {
-                // 初始化数组
+                //容器为空进行初始化流程
                 tab = initTable();
             }
+            // 如果槽位为空
             else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
+                // 以cas方式进行替换，替换成功就中断循环，替换失败则进行下一次循环
                 if (casTabAt(tab, i, null, new Node<K,V>(hash, key, value))) {
                     break; // no lock when adding to empty bin
                 }
             }
+            // 一种特殊的节点（forwarding 节点，迁移节点，只在迁移过程中存在）的处理方式
             else if ((fh = f.hash) == MOVED) {
+                // 帮助进行扩容
                 tab = helpTransfer(tab, f);
             }
             else if (onlyIfAbsent // check first node without acquiring lock
@@ -1059,14 +1071,18 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                      && (fv = f.val) != null) {
                 return fv;
             }
+            // 如果槽位不为空，并且不是（forwarding节点）
             else {
                 V oldVal = null;
                 synchronized (f) {
+                    // double check，如果槽位里面的数据发生变更则重新走流程
                     if (tabAt(tab, i) == f) {
+                        // 如果是链表
                         if (fh >= 0) {
                             binCount = 1;
                             for (Node<K,V> e = f;; ++binCount) {
                                 K ek;
+                                // 如果存在成员则覆盖
                                 if (e.hash == hash && ((ek = e.key) == key || (ek != null && key.equals(ek)))) {
                                     oldVal = e.val;
                                     if (!onlyIfAbsent) {
@@ -1074,6 +1090,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                                     }
                                     break;
                                 }
+                                // 不存在成员则新增
                                 Node<K,V> pred = e;
                                 if ((e = e.next) == null) {
                                     pred.next = new Node<K,V>(hash, key, value);
@@ -1081,6 +1098,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                                 }
                             }
                         }
+                        // 如果是红黑树
                         else if (f instanceof TreeBin) {
                             Node<K,V> p;
                             binCount = 2;
@@ -1096,8 +1114,11 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                         }
                     }
                 }
+                // 如果一个槽位中的数量大于1（只有大于1的才会有binCount）
                 if (binCount != 0) {
+                    // 如果槽位中的成员数量大于等于8，则变更为红黑树
                     if (binCount >= TREEIFY_THRESHOLD) {
+                        // 进行转换成红黑树处理
                         treeifyBin(tab, i);
                     }
                     if (oldVal != null) {
@@ -2319,20 +2340,21 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         Node<K,V>[] tab;
         int sc;
         while ((tab = table) == null || tab.length == 0) {
-            // 有线程正在初始化，当前线程 运行状态转为就绪状态
+            // 有线程正在初始化
             if ((sc = sizeCtl) < 0) {
+                // 放弃当前cpu的使用权，让出时间片，线程计入就绪状态参与竞争
                 Thread.yield(); // lost initialization race; just spin
             }
             // SIZECTL和sc一样把SIZECTL赋值为-1
             // this
             // SIZECTL = U.objectFieldOffset(ConcurrentHashMap.class, "sizeCtl")
-            //
-            //
             else if (U.compareAndSetInt(this, SIZECTL, sc, -1)) {
                 // 后续进来的线程都会进入前面都逻辑 if ((sc = sizeCtl) < 0) {
                 try {
+                    //进行一次double check 防止在进入分支前，容器发生了变更
                     if ((tab = table) == null || tab.length == 0) {
                         int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
+                        //初始化容器
                         @SuppressWarnings("unchecked")
                         Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n];
                         table = tab = nt;
