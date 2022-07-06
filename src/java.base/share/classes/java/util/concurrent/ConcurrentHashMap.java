@@ -263,6 +263,10 @@ import jdk.internal.misc.Unsafe;
  */
 
 /**
+ * https://blog.csdn.net/weixin_39387961/article/details/112919483
+ * https://blog.csdn.net/qq_41050869/article/details/105013708
+ * https://www.zhihu.com/question/430928370/answer/2438081308
+ * https://blog.csdn.net/qq_40794973/article/details/104090332
  * https://blog.csdn.net/qq_18300037/article/details/123795776
  * https://blog.csdn.net/weixin_35833012/article/details/88083678
  */
@@ -769,13 +773,14 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      */
     @SuppressWarnings("unchecked")
     static final <K,V> Node<K,V> tabAt(Node<K,V>[] tab, int i) {
+        // 获取Node[]数组中第i个Node
         return (Node<K,V>)U.getObjectAcquire(tab, ((long)i << ASHIFT) + ABASE);
     }
-
     static final <K,V> boolean casTabAt(Node<K,V>[] tab, int i, Node<K,V> c, Node<K,V> v) {
+        // cas修改Node[]中第i个Node的值 c为旧的值 v为新的值
         return U.compareAndSetObject(tab, ((long)i << ASHIFT) + ABASE, c, v);
     }
-
+    // 直接修改Node[]中第i个Node的值 v为新值
     static final <K,V> void setTabAt(Node<K,V>[] tab, int i, Node<K,V> v) {
         U.putObjectRelease(tab, ((long)i << ASHIFT) + ABASE, v);
     }
@@ -2343,21 +2348,23 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
             // 有线程正在初始化
             if ((sc = sizeCtl) < 0) {
                 // 放弃当前cpu的使用权，让出时间片，线程计入就绪状态参与竞争
+                // 保证只有一个线程正在进行初始化操作
                 Thread.yield(); // lost initialization race; just spin
             }
-            // SIZECTL和sc一样把SIZECTL赋值为-1
-            // this
             // SIZECTL = U.objectFieldOffset(ConcurrentHashMap.class, "sizeCtl")
             else if (U.compareAndSetInt(this, SIZECTL, sc, -1)) {
-                // 后续进来的线程都会进入前面都逻辑 if ((sc = sizeCtl) < 0) {
+                // 后续进入initTable方法的线程都会进入if ((sc = sizeCtl) < 0) {逻辑
                 try {
                     //进行一次double check 防止在进入分支前，容器发生了变更
                     if ((tab = table) == null || tab.length == 0) {
+                        // 得出数组的大小
                         int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
-                        //初始化容器
+                        // 初始化数组
                         @SuppressWarnings("unchecked")
                         Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n];
                         table = tab = nt;
+                        // 计算数组中可用的大小：实际大小n*0.75（加载因子）
+                        // n >>> 2表示整数n无符号向右移2位，高位以0补齐。
                         sc = n - (n >>> 2);
                     }
                 } finally {
