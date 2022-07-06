@@ -2393,7 +2393,9 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         long b;
         long s;
         if ((cs = counterCells) != null || !U.compareAndSetLong(this, BASECOUNT, b = baseCount, s = b + x)) {
-            CounterCell c; long v; int m;
+            CounterCell c;
+            long v;
+            int m;
             boolean uncontended = true;
             if (cs == null || (m = cs.length - 1) < 0 || (c = cs[ThreadLocalRandom.getProbe() & m]) == null || !(uncontended = U.compareAndSetLong(c, CELLVALUE, v = c.value, v + x))) {
                 fullAddCount(x, uncontended);
@@ -2406,7 +2408,10 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         }
 
         if (check >= 0) {
-            Node<K,V>[] tab, nt; int n, sc;
+            Node<K,V>[] tab;
+            Node<K,V>[] nt;
+            int n;
+            int sc;
             while (s >= (long)(sc = sizeCtl) && (tab = table) != null && (n = tab.length) < MAXIMUM_CAPACITY) {
                 int rs = resizeStamp(n);
                 if (sc < 0) {
