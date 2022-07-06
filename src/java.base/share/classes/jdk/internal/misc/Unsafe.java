@@ -49,7 +49,7 @@ import java.security.ProtectionDomain;
  * @author John R. Rose
  * @see #getUnsafe
  */
-
+// Unsafe src/hotspot/share/prims/unsafe.cpp
 public final class Unsafe {
 
     private static native void registerNatives();
