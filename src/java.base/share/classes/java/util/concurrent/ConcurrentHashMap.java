@@ -819,7 +819,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
     // -n    正在扩容
     // 2、正数
     // 0           未初始化，需要进行初始化
-    // 其余正数     当前容器的大小
+    // 其余正数     当前容器要扩容的阈值
     // 代表着初始化资源或者扩容资源的锁，必须要获取到该锁才允许进行初始化或者扩容的操作
     private transient volatile int sizeCtl;
 
@@ -1133,6 +1133,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 }
             }
         }
+        //
         addCount(1L, binCount);
         return null;
     }
@@ -2365,6 +2366,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                         table = tab = nt;
                         // 计算数组中可用的大小：实际大小n*0.75（加载因子）
                         // n >>> 2表示整数n无符号向右移2位，高位以0补齐。
+                        // 16*0.75 = 16-16>>>2 = 4
                         sc = n - (n >>> 2);
                     }
                 } finally {
@@ -2387,38 +2389,37 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
      * @param check if <0, don't check resize, if <= 1 only check if uncontended
      */
     private final void addCount(long x, int check) {
-        CounterCell[] cs; long b, s;
-        if ((cs = counterCells) != null ||
-            !U.compareAndSetLong(this, BASECOUNT, b = baseCount, s = b + x)) {
+        CounterCell[] cs;
+        long b;
+        long s;
+        if ((cs = counterCells) != null || !U.compareAndSetLong(this, BASECOUNT, b = baseCount, s = b + x)) {
             CounterCell c; long v; int m;
             boolean uncontended = true;
-            if (cs == null || (m = cs.length - 1) < 0 ||
-                (c = cs[ThreadLocalRandom.getProbe() & m]) == null ||
-                !(uncontended =
-                  U.compareAndSetLong(c, CELLVALUE, v = c.value, v + x))) {
+            if (cs == null || (m = cs.length - 1) < 0 || (c = cs[ThreadLocalRandom.getProbe() & m]) == null || !(uncontended = U.compareAndSetLong(c, CELLVALUE, v = c.value, v + x))) {
                 fullAddCount(x, uncontended);
                 return;
             }
-            if (check <= 1)
+            if (check <= 1) {
                 return;
+            }
             s = sumCount();
         }
+
         if (check >= 0) {
             Node<K,V>[] tab, nt; int n, sc;
-            while (s >= (long)(sc = sizeCtl) && (tab = table) != null &&
-                   (n = tab.length) < MAXIMUM_CAPACITY) {
+            while (s >= (long)(sc = sizeCtl) && (tab = table) != null && (n = tab.length) < MAXIMUM_CAPACITY) {
                 int rs = resizeStamp(n);
                 if (sc < 0) {
-                    if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
-                        sc == rs + MAX_RESIZERS || (nt = nextTable) == null ||
-                        transferIndex <= 0)
+                    if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 || sc == rs + MAX_RESIZERS || (nt = nextTable) == null || transferIndex <= 0) {
                         break;
-                    if (U.compareAndSetInt(this, SIZECTL, sc, sc + 1))
+                    }
+                    if (U.compareAndSetInt(this, SIZECTL, sc, sc + 1)) {
                         transfer(tab, nt);
+                    }
                 }
-                else if (U.compareAndSetInt(this, SIZECTL, sc,
-                                             (rs << RESIZE_STAMP_SHIFT) + 2))
+                else if (U.compareAndSetInt(this, SIZECTL, sc, (rs << RESIZE_STAMP_SHIFT) + 2)) {
                     transfer(tab, null);
+                }
                 s = sumCount();
             }
         }
@@ -2636,9 +2637,11 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         CounterCell[] cs = counterCells;
         long sum = baseCount;
         if (cs != null) {
-            for (CounterCell c : cs)
-                if (c != null)
+            for (CounterCell c : cs) {
+                if (c != null) {
                     sum += c.value;
+                }
+            }
         }
         return sum;
     }
