@@ -8,8 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConcurrentHashMapTest {
     public static void main(String[] args) {
-        ConcurrentHashMap<Integer, Object> concurrentHashMap = new ConcurrentHashMap<>();
-        concurrentHashMap.put(0, "v");
+        ConcurrentHashMap<Integer, String> concurrentHashMap = new ConcurrentHashMap<>();
+        for (int i = 0; i < 1000; i++) {
+            // i = 11 开始扩容(addCount里面)
+            concurrentHashMap.put(i, "v");
+        }
+
         System.out.println(concurrentHashMap);
 
         // Jdk7ConcurrentHashMap<String, Object> jdk7ConcurrentHashMap = new Jdk7ConcurrentHashMap<>();
