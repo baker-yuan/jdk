@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConcurrentHashMapTest {
     public static void main(String[] args) {
-        ConcurrentHashMap<Object, Object> concurrentHashMap = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Integer, Object> concurrentHashMap = new ConcurrentHashMap<>();
         concurrentHashMap.put(0, "v");
         System.out.println(concurrentHashMap);
 
