@@ -2352,6 +2352,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 Thread.yield(); // lost initialization race; just spin
             }
             // SIZECTL = U.objectFieldOffset(ConcurrentHashMap.class, "sizeCtl")
+            // src/hotspot/share/prims/unsafe.cpp Unsafe_CompareAndSetInt
             else if (U.compareAndSetInt(this, SIZECTL, sc, -1)) {
                 // 后续进入initTable方法的线程都会进入if ((sc = sizeCtl) < 0) {逻辑
                 try {
@@ -6416,6 +6417,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         }
     }
 
+    // src/java.base/share/classes/jdk/internal/misc/Unsafe.java
     // Unsafe mechanics
     private static final Unsafe U = Unsafe.getUnsafe();
     private static final long SIZECTL;
@@ -6431,7 +6433,6 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         TRANSFERINDEX = U.objectFieldOffset(ConcurrentHashMap.class, "transferIndex");
         BASECOUNT = U.objectFieldOffset(ConcurrentHashMap.class, "baseCount");
         CELLSBUSY = U.objectFieldOffset(ConcurrentHashMap.class, "cellsBusy");
-
         CELLVALUE = U.objectFieldOffset(CounterCell.class, "value");
 
         ABASE = U.arrayBaseOffset(Node[].class);
@@ -6444,7 +6445,6 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         // Reduce the risk of rare disastrous classloading in first call to
         // LockSupport.park: https://bugs.openjdk.java.net/browse/JDK-8074773
         Class<?> ensureLoaded = LockSupport.class;
-
         // Eager class load observed to help JIT during startup
         ensureLoaded = ReservationNode.class;
     }
