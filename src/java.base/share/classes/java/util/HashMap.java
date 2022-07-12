@@ -395,7 +395,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     // 从identityHashCode()方法看出key可以是任意类型，都可以变成int类型的hashCode。
     // ----------------------- hashCode底层 -----------------------
 
-    // key可以为null (key == null) ? 0 : ...
+    // HashMapkey可以为null (key == null) ? 0 : ...
     // Hashtable不可以，他直接使用了hash=key.hashCode()，会触发空指针 java.util.Hashtable.addEntry
     static final int hash(Object key) {
         // 步骤
@@ -403,7 +403,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         // 2、按位异或(^)
         // 3、按位与(&)
 
-        //h>>>16 >>>是无符号右移，是用来取出h的高16
+        //h>>>16 >>>是无符号右移，是用来取出h的高16，让高位参与运算
         int h; // 4字节 32位
 
         // 1）如果key等于null：
@@ -451,10 +451,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
     /**
      * Returns a power of two size for the given target capacity.
-     */
-    /**
+     * 返回第一个大于2^n次放的数
      *
-     * @param cap 0返回1
+     * @param cap 如果是0返回1
      * @return threshold
      */
     static final int tableSizeFor(int cap) {
@@ -497,7 +496,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     // 结束 15
     // 00000000 00000000 00000000 00001111
     // ----------------------- cap=10 -----------------------
-    static final int tableSizeForV1(int cap) {
+    static final int tableSizeForV2(int cap) {
         // cap=0 返回1
         int n = cap - 1; // 给 16
         n |= n >>> 1;
@@ -545,7 +544,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * rehash).  This field is used to make iterators on Collection-views of
      * the HashMap fail-fast.  (See ConcurrentModificationException).
      */
-    // 每次扩容和更改map结构的计数器
+    // 计数器
+    // 1、扩容和
+    // 2、putVal
+    // 3、removeNode
+    // 4、..
     transient int modCount;
 
     /**
@@ -584,8 +587,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *
      * @param initialCapacity the initial capacity
      * @param loadFactor      the load factor
-     * @throws IllegalArgumentException if the initial capacity is negative
-     *                                  or the load factor is nonpositive
+     * @throws IllegalArgumentException if the initial capacity is negative or the load factor is nonpositive
      */
     /**
      * 指定“容量大小”和“加载因子”的构造函数
@@ -739,6 +741,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * @return 如果节点为null则返回null，如果节点存在则返回key对应的value。
      */
     public V get(Object key) {
+        // get(Object key) -> getNode(int hash, Object key)
         Node<K, V> e;
         //hash(key)：根据key的hashCode计算hash值，这个跟put中的的一样。
         return (e = getNode(hash(key), key)) == null ? null : e.value;
@@ -759,15 +762,15 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      */
     final Node<K, V> getNode(int hash, Object key) {
         Node<K, V>[] tab;
-        Node<K, V> first;
+        Node<K, V> first; // 数组中的第一个节点（没有冲突就这一个节点，冲突后是链表或者红黑树）
         Node<K, V> e;
         int n;
         K k;
         //根据hash值获取table中节点存放位置，并获取第一个元素。
         if ((tab = table) != null && (n = tab.length) > 0 && (first = tab[(n - 1) & hash]) != null) {
             //如果第一个节点是我们要找的Key，则直接返回
-            if (first.hash == hash && // always check first node
-                    ((k = first.key) == key || (key != null && key.equals(k)))) {
+            if (first.hash == hash && ((k = first.key) == key || (key != null && key.equals(k)))) {
+                // always check first node
                 return first;
             }
             //获取下一个节点的信息
@@ -842,7 +845,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * @return 前一个值，如果没有则返回 null
      */
     final V putVal(int hash, K key, V value, boolean onlyIfAbsent, boolean evict) {
-        // 实现步骤
+        // 实现步骤：
         // 1）先通过hash值计算出key映射到哪个桶。
         // 2）如果桶上没有碰撞冲突，则直接插入。
         // 3）如果出现碰撞冲突了，则需要处理冲突。
@@ -860,7 +863,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         // (n - 1) & hash
         // key.hashCode()计算出的值
 
-        // 计算过程
+        // 计算过程：
         // 1111 1111 1111 1111 1111 0000 1110 1010 h
         // 0000 0000 0000 0000 1111 1111 1111 1111 h >>> 16
         // ------------------------------------------------ (h = key.hashCode()) ^ (h >>> 16)
