@@ -862,6 +862,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         // (h = key.hashCode()) ^ (h >>> 16)
         // (n - 1) & hash
         // key.hashCode()计算出的值
+        // 理解(n-1)&hash：https://blog.csdn.net/qq_40794973/article/details/108943511
 
         // 计算过程：
         // 1111 1111 1111 1111 1111 0000 1110 1010 h
