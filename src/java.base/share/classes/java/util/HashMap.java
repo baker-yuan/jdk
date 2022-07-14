@@ -923,9 +923,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
                 for (int binCount = 0; ; ++binCount) {
                     //p的下一个节点为null,表示p就是最后一个节点
                     if ((e = p.next) == null) {
-                        //创建Node并插入链表的尾部
+                        // 创建Node并插入链表的尾部
                         p.next = newNode(hash, key, value, null);
-                        //当元素>=8-1，链表转为树(红黑树)结构
+                        // 链表转为树(红黑树)结构
                         if (binCount >= TREEIFY_THRESHOLD - 1) {// -1 for 1st
                             treeifyBin(tab, hash);
                         }
@@ -1038,7 +1038,6 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
                     //指定下标数据只有一个
                     if (e.next == null) {
                         //直接将数据存放到新计算的hash值下标
-                        //
                         newTab[e.hash & (newCap - 1)] = e;
                     }
                     //红黑树
@@ -1047,13 +1046,19 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
                         ((TreeNode<K, V>) e).split(this, newTab, j, oldCap);
                     }
                     //链表
-                    else { // preserve order
-                        //重新计算hash值，根据新的下标重新分组
-                        Node<K, V> loHead = null;
-                        Node<K, V> loTail = null;
-                        Node<K, V> hiHead = null;
-                        Node<K, V> hiTail = null;
-                        Node<K, V> next;
+                    else {
+                        // preserve order
+                        // 重新计算hash值，根据新的下标重新分组
+                        // 扩容后新元素的位置特点
+                        // 1、原位置
+                        // 2、原位置+oldCap
+
+                        // 把这个长链表分成两个链表
+                        Node<K, V> loHead = null;   //
+                        Node<K, V> loTail = null;   //
+                        Node<K, V> hiHead = null;   //
+                        Node<K, V> hiTail = null;   //
+                        Node<K, V> next;            //
                         do {
                             next = e.next;
                             if ((e.hash & oldCap) == 0) {
@@ -1110,7 +1115,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             TreeNode<K, V> hd = null; // 红黑树头节点
             TreeNode<K, V> tl = null; // 红黑树尾节点
 
-            // 把链表转为树，这里并不是一步到位的，先把链表转为倾斜的数据（退化为链表的数）
+            // 把链表转为树，这里并不是一步到位的，先把链表转为倾斜的数据（退化为链表的树）
             do {
                 //
                 TreeNode<K, V> p = replacementTreeNode(e, null);
@@ -1252,9 +1257,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         if ((tab = table) != null && size > 0) {
             for (Node<K, V> e : tab) {
                 for (; e != null; e = e.next) {
-                    if ((v = e.value) == value ||
-                            (value != null && value.equals(v)))
+                    if ((v = e.value) == value || (value != null && value.equals(v))) {
                         return true;
+                    }
                 }
             }
         }
@@ -1482,8 +1487,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     public boolean replace(K key, V oldValue, V newValue) {
         Node<K, V> e;
         V v;
-        if ((e = getNode(hash(key), key)) != null &&
-                ((v = e.value) == oldValue || (v != null && v.equals(oldValue)))) {
+        if ((e = getNode(hash(key), key)) != null && ((v = e.value) == oldValue || (v != null && v.equals(oldValue)))) {
             e.value = newValue;
             afterNodeAccess(e);
             return true;
@@ -1514,8 +1518,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *                                         mapping function modified this map
      */
     @Override
-    public V computeIfAbsent(K key,
-                             Function<? super K, ? extends V> mappingFunction) {
+    public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
         if (mappingFunction == null)
             throw new NullPointerException();
         int hash = hash(key);
@@ -1584,8 +1587,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *                                         remapping function modified this map
      */
     @Override
-    public V computeIfPresent(K key,
-                              BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         if (remappingFunction == null)
             throw new NullPointerException();
         Node<K, V> e;
@@ -1619,8 +1621,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *                                         remapping function modified this map
      */
     @Override
-    public V compute(K key,
-                     BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         if (remappingFunction == null)
             throw new NullPointerException();
         int hash = hash(key);
@@ -1687,8 +1688,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *                                         remapping function modified this map
      */
     @Override
-    public V merge(K key, V value,
-                   BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+    public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
         if (value == null)
             throw new NullPointerException();
         if (remappingFunction == null)
@@ -1830,8 +1830,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * for each key-value mapping.  The key-value mappings are
      * emitted in no particular order.
      */
-    private void writeObject(java.io.ObjectOutputStream s)
-            throws IOException {
+    private void writeObject(java.io.ObjectOutputStream s) throws IOException {
         int buckets = capacity();
         // Write out the threshold, loadfactor, and any hidden stuff
         s.defaultWriteObject();
@@ -1848,8 +1847,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      *                                could not be found
      * @throws IOException            if an I/O error occurs
      */
-    private void readObject(java.io.ObjectInputStream s)
-            throws IOException, ClassNotFoundException {
+    private void readObject(java.io.ObjectInputStream s) throws IOException, ClassNotFoundException {
         // Read in the threshold (ignored), loadfactor, and any hidden stuff
         s.defaultReadObject();
         reinitialize();
@@ -2705,8 +2703,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         /* ------------------------------------------------------------ */
         // Red-black tree methods, all adapted from CLR
 
-        static <K, V> TreeNode<K, V> rotateLeft(TreeNode<K, V> root,
-                                                TreeNode<K, V> p) {
+        static <K, V> TreeNode<K, V> rotateLeft(TreeNode<K, V> root, TreeNode<K, V> p) {
             TreeNode<K, V> r, pp, rl;
             if (p != null && (r = p.right) != null) {
                 if ((rl = p.right = r.left) != null)
@@ -2723,8 +2720,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             return root;
         }
 
-        static <K, V> TreeNode<K, V> rotateRight(TreeNode<K, V> root,
-                                                 TreeNode<K, V> p) {
+        static <K, V> TreeNode<K, V> rotateRight(TreeNode<K, V> root, TreeNode<K, V> p) {
             TreeNode<K, V> l, pp, lr;
             if (p != null && (l = p.left) != null) {
                 if ((lr = p.left = l.right) != null)
@@ -2741,8 +2737,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             return root;
         }
 
-        static <K, V> TreeNode<K, V> balanceInsertion(TreeNode<K, V> root,
-                                                      TreeNode<K, V> x) {
+        static <K, V> TreeNode<K, V> balanceInsertion(TreeNode<K, V> root, TreeNode<K, V> x) {
             x.red = true;
             for (TreeNode<K, V> xp, xpp, xppl, xppr; ; ) {
                 if ((xp = x.parent) == null) {
@@ -2792,8 +2787,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             }
         }
 
-        static <K, V> TreeNode<K, V> balanceDeletion(TreeNode<K, V> root,
-                                                     TreeNode<K, V> x) {
+        static <K, V> TreeNode<K, V> balanceDeletion(TreeNode<K, V> root, TreeNode<K, V> x) {
             for (TreeNode<K, V> xp, xpl, xpr; ; ) {
                 if (x == null || x == root)
                     return root;
