@@ -1051,7 +1051,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
                         // 重新计算hash值，根据新的下标重新分组
                         // 扩容后新元素的位置特点
                         // 1、原位置
-                        // 2、原位置+oldCap
+                        // 2、原位置+原数组长度
 
                         // 把这个长链表分成两个链表
                         Node<K, V> loHead = null;   //
