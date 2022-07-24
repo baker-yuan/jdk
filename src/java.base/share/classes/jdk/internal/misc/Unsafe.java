@@ -50,6 +50,8 @@ import java.security.ProtectionDomain;
  * @see #getUnsafe
  */
 // Unsafe src/hotspot/share/prims/unsafe.cpp
+// https://blog.csdn.net/weixin_41951205/article/details/123344891
+//final修饰无法被继承
 public final class Unsafe {
 
     private static native void registerNatives();
@@ -57,8 +59,10 @@ public final class Unsafe {
         registerNatives();
     }
 
+    //构造方法被私有化
     private Unsafe() {}
 
+    //单例
     private static final Unsafe theUnsafe = new Unsafe();
 
     /**
@@ -1310,7 +1314,7 @@ public final class Unsafe {
      *
      * @return {@code true} if successful
      */
-    @HotSpotIntrinsicCandidate
+    @HotSpotIntrinsicCandidate //
     public final native boolean compareAndSetInt(Object o, long offset, int expected, int x);
 
     @HotSpotIntrinsicCandidate
@@ -2223,6 +2227,7 @@ public final class Unsafe {
      */
     @HotSpotIntrinsicCandidate
     public final int getAndAddInt(Object o, long offset, int delta) {
+        // 自旋+CAS
         int v;
         do {
             v = getIntVolatile(o, offset);
