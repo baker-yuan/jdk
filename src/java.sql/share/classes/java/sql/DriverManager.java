@@ -593,7 +593,8 @@ public class DriverManager {
 
             AccessController.doPrivileged(new PrivilegedAction<Void>() {
                 public Void run() {
-
+                    // SPI
+                    // java.util.ServiceLoader#load(Class<S>)
                     ServiceLoader<Driver> loadedDrivers = ServiceLoader.load(Driver.class);
                     Iterator<Driver> driversIterator = loadedDrivers.iterator();
 

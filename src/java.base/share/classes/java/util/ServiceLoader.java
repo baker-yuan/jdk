@@ -386,10 +386,8 @@ import jdk.internal.reflect.Reflection;
  * @revised 9
  * @spec JPMS
  */
-
-public final class ServiceLoader<S>
-    implements Iterable<S>
-{
+// SPI机制
+public final class ServiceLoader<S> implements Iterable<S> {
     // The class or interface representing the service being loaded
     private final Class<S> service;
 
@@ -1529,10 +1527,7 @@ public final class ServiceLoader<S>
      *
      * @return A new service loader
      */
-    static <S> ServiceLoader<S> load(Class<S> service,
-                                     ClassLoader loader,
-                                     Module callerModule)
-    {
+    static <S> ServiceLoader<S> load(Class<S> service, ClassLoader loader, Module callerModule) {
         return new ServiceLoader<>(callerModule, service, loader);
     }
 
@@ -1640,9 +1635,7 @@ public final class ServiceLoader<S>
      * @spec JPMS
      */
     @CallerSensitive
-    public static <S> ServiceLoader<S> load(Class<S> service,
-                                            ClassLoader loader)
-    {
+    public static <S> ServiceLoader<S> load(Class<S> service, ClassLoader loader) {
         return new ServiceLoader<>(Reflection.getCallerClass(), service, loader);
     }
 
@@ -1687,6 +1680,8 @@ public final class ServiceLoader<S>
      */
     @CallerSensitive
     public static <S> ServiceLoader<S> load(Class<S> service) {
+        // 线程上下文类加载器
+        //
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         return new ServiceLoader<>(Reflection.getCallerClass(), service, cl);
     }
