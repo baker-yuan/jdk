@@ -7,7 +7,8 @@ import sun.misc.Unsafe;
 import java.lang.reflect.Field;
 
 /**
- *
+ * 自己来模拟锁
+ * 自旋来实现同步（局限）
  *
  *
  * 1、什么是锁
