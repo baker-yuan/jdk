@@ -293,8 +293,7 @@ public class Proxy implements java.io.Serializable {
      * a cache of proxy constructors with
      * {@link Constructor#setAccessible(boolean) accessible} flag already set
      */
-    private static final ClassLoaderValue<Constructor<?>> proxyCache =
-        new ClassLoaderValue<>();
+    private static final ClassLoaderValue<Constructor<?>> proxyCache = new ClassLoaderValue<>();
 
     /**
      * the invocation handler for this proxy instance.
@@ -400,20 +399,20 @@ public class Proxy implements java.io.Serializable {
      * @return  a Constructor of the proxy class taking single
      *          {@code InvocationHandler} parameter
      */
-    private static Constructor<?> getProxyConstructor(Class<?> caller,
-                                                      ClassLoader loader,
-                                                      Class<?>... interfaces)
-    {
+    private static Constructor<?> getProxyConstructor(Class<?> caller, ClassLoader loader, Class<?>... interfaces) {
         // optimization for single interface
         if (interfaces.length == 1) {
+            // 如果当前被代理对象的父接口只有一个
             Class<?> intf = interfaces[0];
+            // 权限判断（略过）
             if (caller != null) {
                 checkProxyAccess(caller, loader, intf);
             }
-            return proxyCache.sub(intf).computeIfAbsent(
-                loader,
-                (ld, clv) -> new ProxyBuilder(ld, clv.key()).build()
-            );
+            // proxyCache 是一个 ClassLoaderValue 类型的对象
+            // 本质上是一个接口和 classloader 对应构造器的缓存，如果都没有就新建一个
+            // ProxyBuilder 使用 classloader 和 ClassLoaderValue 的 key 创建一个 Proxy 并存入 CLassLoaderValue 里
+            // clv 是 proxyCache，ld 是 classloader
+            return proxyCache.sub(intf).computeIfAbsent(loader, (ld, clv) -> new ProxyBuilder(ld, clv.key()).build());
         } else {
             // interfaces cloned
             final Class<?>[] intfsArray = interfaces.clone();
@@ -421,10 +420,8 @@ public class Proxy implements java.io.Serializable {
                 checkProxyAccess(caller, loader, intfsArray);
             }
             final List<Class<?>> intfs = Arrays.asList(intfsArray);
-            return proxyCache.sub(intfs).computeIfAbsent(
-                loader,
-                (ld, clv) -> new ProxyBuilder(ld, clv.key()).build()
-            );
+
+            return proxyCache.sub(intfs).computeIfAbsent(loader, (ld, clv) -> new ProxyBuilder(ld, clv.key()).build());
         }
     }
 
@@ -611,14 +608,13 @@ public class Proxy implements java.io.Serializable {
 
         private final List<Class<?>> interfaces;
         private final Module module;
+
         ProxyBuilder(ClassLoader loader, List<Class<?>> interfaces) {
             if (!VM.isModuleSystemInited()) {
-                throw new InternalError("Proxy is not supported until "
-                        + "module system is fully initialized");
+                throw new InternalError("Proxy is not supported until " + "module system is fully initialized");
             }
             if (interfaces.size() > 65535) {
-                throw new IllegalArgumentException("interface limit exceeded: "
-                        + interfaces.size());
+                throw new IllegalArgumentException("interface limit exceeded: " + interfaces.size());
             }
 
             Set<Class<?>> refTypes = referencedTypes(loader, interfaces);
@@ -990,27 +986,33 @@ public class Proxy implements java.io.Serializable {
      * @revised 9
      * @spec JPMS
      */
+    /**
+     * 创建代理对象
+     *
+     * @param loader
+     * @param interfaces
+     * @param h
+     * @return
+     */
     @CallerSensitive
-    public static Object newProxyInstance(ClassLoader loader,
-                                          Class<?>[] interfaces,
-                                          InvocationHandler h) {
+    public static Object newProxyInstance(ClassLoader loader, Class<?>[] interfaces, InvocationHandler h) {
         Objects.requireNonNull(h);
-
-        final Class<?> caller = System.getSecurityManager() == null
-                                    ? null
-                                    : Reflection.getCallerClass();
-
+        final Class<?> caller = System.getSecurityManager() == null ? null : Reflection.getCallerClass();
         /*
          * Look up or generate the designated proxy class and its constructor.
          */
         Constructor<?> cons = getProxyConstructor(caller, loader, interfaces);
-
         return newProxyInstance(caller, cons, h);
     }
 
-    private static Object newProxyInstance(Class<?> caller, // null if no SecurityManager
-                                           Constructor<?> cons,
-                                           InvocationHandler h) {
+    /**
+     *
+     * @param caller null if no SecurityManager
+     * @param cons
+     * @param h
+     * @return
+     */
+    private static Object newProxyInstance(Class<?> caller, Constructor<?> cons, InvocationHandler h) {
         /*
          * Invoke its constructor with the designated invocation handler.
          */
@@ -1018,7 +1020,6 @@ public class Proxy implements java.io.Serializable {
             if (caller != null) {
                 checkNewProxyPermission(caller, cons.getDeclaringClass());
             }
-
             return cons.newInstance(new Object[]{h});
         } catch (IllegalAccessException | InstantiationException e) {
             throw new InternalError(e.toString(), e);

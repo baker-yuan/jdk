@@ -76,8 +76,7 @@ import java.util.function.BiFunction;
  * @author Peter Levart
  * @since 9
  */
-public final class ClassLoaderValue<V>
-    extends AbstractClassLoaderValue<ClassLoaderValue<V>, V> {
+public final class ClassLoaderValue<V> extends AbstractClassLoaderValue<ClassLoaderValue<V>, V> {
 
     /**
      * Constructs new root-ClassLoaderValue representing its own namespace.

@@ -22,7 +22,8 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
+// https://segmentfault.com/a/1190000039238240
+// https://mp.weixin.qq.com/s/XUlDesM72tx4jEOURpEQlQ
 package java.lang.reflect;
 
 /**
@@ -90,6 +91,14 @@ public interface InvocationHandler {
      *
      * @see     UndeclaredThrowableException
      */
-    public Object invoke(Object proxy, Method method, Object[] args)
-        throws Throwable;
+
+    /**
+     * 创建代理对象
+     * Proxy.newProxyInstance(ClassLoader loader, Class<?>[] interfaces, InvocationHandler h)
+     *
+     * @param proxy  代理对象引用
+     * @param method 正在执行目标的方法
+     * @param args   目标方法执行时的入参
+     */
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable;
 }
