@@ -94,11 +94,13 @@ public interface InvocationHandler {
 
     /**
      * 创建代理对象
-     * Proxy.newProxyInstance(ClassLoader loader, Class<?>[] interfaces, InvocationHandler h)
+     * Proxy.newProxyInstance(ClassLoader loader, Class[] interfaces, InvocationHandler h)
      *
      * @param proxy  代理对象引用
      * @param method 正在执行目标的方法
      * @param args   目标方法执行时的入参
+     * @return  代理对象
+     * @throws Throwable e
      */
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable;
 }

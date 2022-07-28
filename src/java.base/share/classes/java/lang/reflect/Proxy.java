@@ -989,28 +989,31 @@ public class Proxy implements java.io.Serializable {
     /**
      * 创建代理对象
      *
-     * @param loader
-     * @param interfaces
-     * @param h
-     * @return
+     * @param loader 类加载器
+     * @param interfaces 接口
+     * @param h InvocationHandler
+     * @return 代理对象
      */
     @CallerSensitive
     public static Object newProxyInstance(ClassLoader loader, Class<?>[] interfaces, InvocationHandler h) {
         Objects.requireNonNull(h);
         final Class<?> caller = System.getSecurityManager() == null ? null : Reflection.getCallerClass();
+
         /*
          * Look up or generate the designated proxy class and its constructor.
          */
         Constructor<?> cons = getProxyConstructor(caller, loader, interfaces);
-        return newProxyInstance(caller, cons, h);
+
+        Object result =  newProxyInstance(caller, cons, h);
+        return result;
     }
 
     /**
      *
      * @param caller null if no SecurityManager
-     * @param cons
-     * @param h
-     * @return
+     * @param cons 类加载器
+     * @param h InvocationHandler
+     * @return 代理对象
      */
     private static Object newProxyInstance(Class<?> caller, Constructor<?> cons, InvocationHandler h) {
         /*
