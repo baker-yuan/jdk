@@ -3,11 +3,22 @@ package cn.baker.jvm.dynamicproxy;
 
 import java.lang.reflect.Proxy;
 
+/**
+ * https://zhuanlan.zhihu.com/p/355575054
+ */
 public class ServiceProxy {
 
 
+    /**
+     * -Djdk.proxy.debug=debug
+     * jdk.proxy.ProxyGenerator.saveGeneratedFiles
+     * @param args
+     */
     public static void main(String[] args) {
-        IHello IHello = (IHello) getInstance(IHello.class, new ProxyHandler<>(new Hello()));
+
+
+        Hello origin = new Hello();
+        IHello IHello = (IHello) getInstance(IHello.class, new ProxyHandler<>(origin));
 
         System.out.println(IHello.toString());
 
