@@ -40,17 +40,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+
 import sun.security.action.GetBooleanAction;
 
 /**
  * ProxyGenerator contains the code to generate a dynamic proxy class
  * for the java.lang.reflect.Proxy API.
- *
+ * <p>
  * The external interfaces to ProxyGenerator is the static
  * "generateProxyClass" method.
  *
- * @author      Peter Jones
- * @since       1.3
+ * @author Peter Jones
+ * @since 1.3
  */
 class ProxyGenerator {
     /*
@@ -70,40 +71,40 @@ class ProxyGenerator {
      */
 
     /* constant pool tags */
-    private static final int CONSTANT_UTF8              = 1;
-    private static final int CONSTANT_UNICODE           = 2;
-    private static final int CONSTANT_INTEGER           = 3;
-    private static final int CONSTANT_FLOAT             = 4;
-    private static final int CONSTANT_LONG              = 5;
-    private static final int CONSTANT_DOUBLE            = 6;
-    private static final int CONSTANT_CLASS             = 7;
-    private static final int CONSTANT_STRING            = 8;
-    private static final int CONSTANT_FIELD             = 9;
-    private static final int CONSTANT_METHOD            = 10;
-    private static final int CONSTANT_INTERFACEMETHOD   = 11;
-    private static final int CONSTANT_NAMEANDTYPE       = 12;
+    private static final int CONSTANT_UTF8 = 1;
+    private static final int CONSTANT_UNICODE = 2;
+    private static final int CONSTANT_INTEGER = 3;
+    private static final int CONSTANT_FLOAT = 4;
+    private static final int CONSTANT_LONG = 5;
+    private static final int CONSTANT_DOUBLE = 6;
+    private static final int CONSTANT_CLASS = 7;
+    private static final int CONSTANT_STRING = 8;
+    private static final int CONSTANT_FIELD = 9;
+    private static final int CONSTANT_METHOD = 10;
+    private static final int CONSTANT_INTERFACEMETHOD = 11;
+    private static final int CONSTANT_NAMEANDTYPE = 12;
 
     /* access and modifier flags */
-    private static final int ACC_PUBLIC                 = 0x00000001;
-    private static final int ACC_PRIVATE                = 0x00000002;
-//  private static final int ACC_PROTECTED              = 0x00000004;
-    private static final int ACC_STATIC                 = 0x00000008;
-    private static final int ACC_FINAL                  = 0x00000010;
-//  private static final int ACC_SYNCHRONIZED           = 0x00000020;
+    private static final int ACC_PUBLIC = 0x00000001;
+    private static final int ACC_PRIVATE = 0x00000002;
+    //  private static final int ACC_PROTECTED              = 0x00000004;
+    private static final int ACC_STATIC = 0x00000008;
+    private static final int ACC_FINAL = 0x00000010;
+    //  private static final int ACC_SYNCHRONIZED           = 0x00000020;
 //  private static final int ACC_VOLATILE               = 0x00000040;
 //  private static final int ACC_TRANSIENT              = 0x00000080;
 //  private static final int ACC_NATIVE                 = 0x00000100;
 //  private static final int ACC_INTERFACE              = 0x00000200;
 //  private static final int ACC_ABSTRACT               = 0x00000400;
-    private static final int ACC_SUPER                  = 0x00000020;
+    private static final int ACC_SUPER = 0x00000020;
 //  private static final int ACC_STRICT                 = 0x00000800;
 
     /* opcodes */
 //  private static final int opc_nop                    = 0;
-    private static final int opc_aconst_null            = 1;
-//  private static final int opc_iconst_m1              = 2;
-    private static final int opc_iconst_0               = 3;
-//  private static final int opc_iconst_1               = 4;
+    private static final int opc_aconst_null = 1;
+    //  private static final int opc_iconst_m1              = 2;
+    private static final int opc_iconst_0 = 3;
+    //  private static final int opc_iconst_1               = 4;
 //  private static final int opc_iconst_2               = 5;
 //  private static final int opc_iconst_3               = 6;
 //  private static final int opc_iconst_4               = 7;
@@ -115,34 +116,34 @@ class ProxyGenerator {
 //  private static final int opc_fconst_2               = 13;
 //  private static final int opc_dconst_0               = 14;
 //  private static final int opc_dconst_1               = 15;
-    private static final int opc_bipush                 = 16;
-    private static final int opc_sipush                 = 17;
-    private static final int opc_ldc                    = 18;
-    private static final int opc_ldc_w                  = 19;
-//  private static final int opc_ldc2_w                 = 20;
-    private static final int opc_iload                  = 21;
-    private static final int opc_lload                  = 22;
-    private static final int opc_fload                  = 23;
-    private static final int opc_dload                  = 24;
-    private static final int opc_aload                  = 25;
-    private static final int opc_iload_0                = 26;
-//  private static final int opc_iload_1                = 27;
+    private static final int opc_bipush = 16;
+    private static final int opc_sipush = 17;
+    private static final int opc_ldc = 18;
+    private static final int opc_ldc_w = 19;
+    //  private static final int opc_ldc2_w                 = 20;
+    private static final int opc_iload = 21;
+    private static final int opc_lload = 22;
+    private static final int opc_fload = 23;
+    private static final int opc_dload = 24;
+    private static final int opc_aload = 25;
+    private static final int opc_iload_0 = 26;
+    //  private static final int opc_iload_1                = 27;
 //  private static final int opc_iload_2                = 28;
 //  private static final int opc_iload_3                = 29;
-    private static final int opc_lload_0                = 30;
-//  private static final int opc_lload_1                = 31;
+    private static final int opc_lload_0 = 30;
+    //  private static final int opc_lload_1                = 31;
 //  private static final int opc_lload_2                = 32;
 //  private static final int opc_lload_3                = 33;
-    private static final int opc_fload_0                = 34;
-//  private static final int opc_fload_1                = 35;
+    private static final int opc_fload_0 = 34;
+    //  private static final int opc_fload_1                = 35;
 //  private static final int opc_fload_2                = 36;
 //  private static final int opc_fload_3                = 37;
-    private static final int opc_dload_0                = 38;
-//  private static final int opc_dload_1                = 39;
+    private static final int opc_dload_0 = 38;
+    //  private static final int opc_dload_1                = 39;
 //  private static final int opc_dload_2                = 40;
 //  private static final int opc_dload_3                = 41;
-    private static final int opc_aload_0                = 42;
-//  private static final int opc_aload_1                = 43;
+    private static final int opc_aload_0 = 42;
+    //  private static final int opc_aload_1                = 43;
 //  private static final int opc_aload_2                = 44;
 //  private static final int opc_aload_3                = 45;
 //  private static final int opc_iaload                 = 46;
@@ -157,8 +158,8 @@ class ProxyGenerator {
 //  private static final int opc_lstore                 = 55;
 //  private static final int opc_fstore                 = 56;
 //  private static final int opc_dstore                 = 57;
-    private static final int opc_astore                 = 58;
-//  private static final int opc_istore_0               = 59;
+    private static final int opc_astore = 58;
+    //  private static final int opc_istore_0               = 59;
 //  private static final int opc_istore_1               = 60;
 //  private static final int opc_istore_2               = 61;
 //  private static final int opc_istore_3               = 62;
@@ -174,22 +175,22 @@ class ProxyGenerator {
 //  private static final int opc_dstore_1               = 72;
 //  private static final int opc_dstore_2               = 73;
 //  private static final int opc_dstore_3               = 74;
-    private static final int opc_astore_0               = 75;
-//  private static final int opc_astore_1               = 76;
+    private static final int opc_astore_0 = 75;
+    //  private static final int opc_astore_1               = 76;
 //  private static final int opc_astore_2               = 77;
 //  private static final int opc_astore_3               = 78;
 //  private static final int opc_iastore                = 79;
 //  private static final int opc_lastore                = 80;
 //  private static final int opc_fastore                = 81;
 //  private static final int opc_dastore                = 82;
-    private static final int opc_aastore                = 83;
-//  private static final int opc_bastore                = 84;
+    private static final int opc_aastore = 83;
+    //  private static final int opc_bastore                = 84;
 //  private static final int opc_castore                = 85;
 //  private static final int opc_sastore                = 86;
-    private static final int opc_pop                    = 87;
-//  private static final int opc_pop2                   = 88;
-    private static final int opc_dup                    = 89;
-//  private static final int opc_dup_x1                 = 90;
+    private static final int opc_pop = 87;
+    //  private static final int opc_pop2                   = 88;
+    private static final int opc_dup = 89;
+    //  private static final int opc_dup_x1                 = 90;
 //  private static final int opc_dup_x2                 = 91;
 //  private static final int opc_dup2                   = 92;
 //  private static final int opc_dup2_x1                = 93;
@@ -271,30 +272,30 @@ class ProxyGenerator {
 //  private static final int opc_ret                    = 169;
 //  private static final int opc_tableswitch            = 170;
 //  private static final int opc_lookupswitch           = 171;
-    private static final int opc_ireturn                = 172;
-    private static final int opc_lreturn                = 173;
-    private static final int opc_freturn                = 174;
-    private static final int opc_dreturn                = 175;
-    private static final int opc_areturn                = 176;
-    private static final int opc_return                 = 177;
-    private static final int opc_getstatic              = 178;
-    private static final int opc_putstatic              = 179;
-    private static final int opc_getfield               = 180;
-//  private static final int opc_putfield               = 181;
-    private static final int opc_invokevirtual          = 182;
-    private static final int opc_invokespecial          = 183;
-    private static final int opc_invokestatic           = 184;
-    private static final int opc_invokeinterface        = 185;
-    private static final int opc_new                    = 187;
-//  private static final int opc_newarray               = 188;
-    private static final int opc_anewarray              = 189;
-//  private static final int opc_arraylength            = 190;
-    private static final int opc_athrow                 = 191;
-    private static final int opc_checkcast              = 192;
-//  private static final int opc_instanceof             = 193;
+    private static final int opc_ireturn = 172;
+    private static final int opc_lreturn = 173;
+    private static final int opc_freturn = 174;
+    private static final int opc_dreturn = 175;
+    private static final int opc_areturn = 176;
+    private static final int opc_return = 177;
+    private static final int opc_getstatic = 178;
+    private static final int opc_putstatic = 179;
+    private static final int opc_getfield = 180;
+    //  private static final int opc_putfield               = 181;
+    private static final int opc_invokevirtual = 182;
+    private static final int opc_invokespecial = 183;
+    private static final int opc_invokestatic = 184;
+    private static final int opc_invokeinterface = 185;
+    private static final int opc_new = 187;
+    //  private static final int opc_newarray               = 188;
+    private static final int opc_anewarray = 189;
+    //  private static final int opc_arraylength            = 190;
+    private static final int opc_athrow = 191;
+    private static final int opc_checkcast = 192;
+    //  private static final int opc_instanceof             = 193;
 //  private static final int opc_monitorenter           = 194;
 //  private static final int opc_monitorexit            = 195;
-    private static final int opc_wide                   = 196;
+    private static final int opc_wide = 196;
 //  private static final int opc_multianewarray         = 197;
 //  private static final int opc_ifnull                 = 198;
 //  private static final int opc_ifnonnull              = 199;
@@ -303,23 +304,28 @@ class ProxyGenerator {
 
     // end of constants copied from sun.tools.java.RuntimeConstants
 
-    /** name of the superclass of proxy classes */
+    /**
+     * name of the superclass of proxy classes
+     */
     private static final String superclassName = "java/lang/reflect/Proxy";
 
-    /** name of field for storing a proxy instance's invocation handler */
+    /**
+     * name of field for storing a proxy instance's invocation handler
+     */
     private static final String handlerFieldName = "h";
 
-    /** debugging flag for saving generated class files */
-    private static final boolean saveGeneratedFiles =
-        java.security.AccessController.doPrivileged(
-            new GetBooleanAction(
-                "jdk.proxy.ProxyGenerator.saveGeneratedFiles")).booleanValue();
+    /**
+     * 生成代理对象到文件里面
+     */
+    /**
+     * debugging flag for saving generated class files
+     */
+    private static final boolean saveGeneratedFiles = java.security.AccessController.doPrivileged(new GetBooleanAction("jdk.proxy.ProxyGenerator.saveGeneratedFiles")).booleanValue();
 
     /**
      * Generate a public proxy class given a name and a list of proxy interfaces.
      */
-    static byte[] generateProxyClass(final String name,
-                                     Class<?>[] interfaces) {
+    static byte[] generateProxyClass(final String name, Class<?>[] interfaces) {
         return generateProxyClass(name, interfaces, (ACC_PUBLIC | ACC_FINAL | ACC_SUPER));
     }
 
@@ -329,36 +335,40 @@ class ProxyGenerator {
      * @param name        the class name of the proxy class
      * @param interfaces  proxy interfaces
      * @param accessFlags access flags of the proxy class
-    */
-    static byte[] generateProxyClass(final String name,
-                                     Class<?>[] interfaces,
-                                     int accessFlags)
-    {
+     */
+    /**
+     * @param name        代理对象全路径名称
+     * @param interfaces  代理对象实现到接口
+     * @param accessFlags 代理对象访问标识符
+     * @return
+     */
+    static byte[] generateProxyClass(final String name, Class<?>[] interfaces, int accessFlags) {
         ProxyGenerator gen = new ProxyGenerator(name, interfaces, accessFlags);
         final byte[] classFile = gen.generateClassFile();
 
+        // 是否需要生成代理类到文件里面
         if (saveGeneratedFiles) {
             java.security.AccessController.doPrivileged(
-            new java.security.PrivilegedAction<Void>() {
-                public Void run() {
-                    try {
-                        int i = name.lastIndexOf('.');
-                        Path path;
-                        if (i > 0) {
-                            Path dir = Path.of(name.substring(0, i).replace('.', File.separatorChar));
-                            Files.createDirectories(dir);
-                            path = dir.resolve(name.substring(i+1, name.length()) + ".class");
-                        } else {
-                            path = Path.of(name + ".class");
+                    new java.security.PrivilegedAction<Void>() {
+                        public Void run() {
+                            try {
+                                int i = name.lastIndexOf('.');
+                                Path path;
+                                if (i > 0) {
+                                    Path dir = Path.of(name.substring(0, i).replace('.', File.separatorChar));
+                                    Files.createDirectories(dir);
+                                    path = dir.resolve(name.substring(i + 1, name.length()) + ".class");
+                                } else {
+                                    path = Path.of(name + ".class");
+                                }
+                                Files.write(path, classFile);
+                                System.out.println("生成代理类路径：" + path);
+                                return null;
+                            } catch (IOException e) {
+                                throw new InternalError("I/O exception saving generated file: " + e);
+                            }
                         }
-                        Files.write(path, classFile);
-                        return null;
-                    } catch (IOException e) {
-                        throw new InternalError(
-                            "I/O exception saving generated file: " + e);
-                    }
-                }
-            });
+                    });
         }
 
         return classFile;
@@ -368,33 +378,46 @@ class ProxyGenerator {
     private static Method hashCodeMethod;
     private static Method equalsMethod;
     private static Method toStringMethod;
+
     static {
         try {
             hashCodeMethod = Object.class.getMethod("hashCode");
-            equalsMethod =
-                Object.class.getMethod("equals", new Class<?>[] { Object.class });
+            equalsMethod = Object.class.getMethod("equals", new Class<?>[]{Object.class});
             toStringMethod = Object.class.getMethod("toString");
         } catch (NoSuchMethodException e) {
             throw new NoSuchMethodError(e.getMessage());
         }
     }
 
-    /** name of proxy class */
+    /**
+     * 代理对象全路径名称
+     * name of proxy class
+     */
     private String className;
-
-    /** proxy interfaces */
+    /**
+     * 代理对象实现到接口
+     * proxy interfaces
+     */
     private Class<?>[] interfaces;
-
-    /** proxy class access flags */
+    /**
+     * 代理对象访问标识符
+     * proxy class access flags
+     */
     private int accessFlags;
 
-    /** constant pool of class being generated */
+    /**
+     * constant pool of class being generated
+     */
     private ConstantPool cp = new ConstantPool();
 
-    /** FieldInfo struct for each field of generated class */
+    /**
+     * FieldInfo struct for each field of generated class
+     */
     private List<FieldInfo> fields = new ArrayList<>();
 
-    /** MethodInfo struct for each method of generated class */
+    /**
+     * MethodInfo struct for each method of generated class
+     */
     private List<MethodInfo> methods = new ArrayList<>();
 
     /**
@@ -403,7 +426,9 @@ class ProxyGenerator {
      */
     private Map<String, List<ProxyMethod>> proxyMethods = new HashMap<>();
 
-    /** count of ProxyMethod objects added to proxyMethods */
+    /**
+     * count of ProxyMethod objects added to proxyMethods
+     */
     private int proxyMethodCount = 0;
 
     /**
@@ -412,6 +437,11 @@ class ProxyGenerator {
      *
      * A ProxyGenerator object contains the state for the ongoing
      * generation of a particular proxy class.
+     */
+    /**
+     * @param className   类名
+     * @param interfaces  接口
+     * @param accessFlags access_flag
      */
     private ProxyGenerator(String className, Class<?>[] interfaces, int accessFlags) {
         this.className = className;
@@ -424,12 +454,10 @@ class ProxyGenerator {
      * class file generation process.
      */
     private byte[] generateClassFile() {
-
         /* ============================================================
          * Step 1: Assemble ProxyMethod objects for all methods to
          * generate proxy dispatching code for.
          */
-
         /*
          * Record that proxy methods are needed for the hashCode, equals,
          * and toString methods of java.lang.Object.  This is done before
@@ -437,8 +465,11 @@ class ProxyGenerator {
          * java.lang.Object take precedence over duplicate methods in the
          * proxy interfaces.
          */
+        // hashCode
         addProxyMethod(hashCodeMethod, Object.class);
+        // equals
         addProxyMethod(equalsMethod, Object.class);
+        // toString
         addProxyMethod(toStringMethod, Object.class);
 
         /*
@@ -467,23 +498,17 @@ class ProxyGenerator {
          * fields and methods in the class we are generating.
          */
         try {
+            // 有参构造函数 入参是InvocationHandler
             methods.add(generateConstructor());
-
             for (List<ProxyMethod> sigmethods : proxyMethods.values()) {
                 for (ProxyMethod pm : sigmethods) {
-
                     // add static field for method's Method object
-                    fields.add(new FieldInfo(pm.methodFieldName,
-                        "Ljava/lang/reflect/Method;",
-                         ACC_PRIVATE | ACC_STATIC));
-
+                    fields.add(new FieldInfo(pm.methodFieldName, "Ljava/lang/reflect/Method;", ACC_PRIVATE | ACC_STATIC));
                     // generate code for proxy method and add it
                     methods.add(pm.generateMethod());
                 }
             }
-
             methods.add(generateStaticInitializer());
-
         } catch (IOException e) {
             throw new InternalError("unexpected I/O Exception", e);
         }
@@ -498,14 +523,13 @@ class ProxyGenerator {
         /* ============================================================
          * Step 3: Write the final class file.
          */
-
         /*
          * Make sure that constant pool indexes are reserved for the
          * following items before starting to write the final class file.
          */
         cp.getClass(dotToSlash(className));
         cp.getClass(superclassName);
-        for (Class<?> intf: interfaces) {
+        for (Class<?> intf : interfaces) {
             cp.getClass(dotToSlash(intf.getName()));
         }
 
@@ -515,53 +539,68 @@ class ProxyGenerator {
          */
         cp.setReadOnly();
 
+        // ClassFile {
+        //     u4             magic;//固定的开头，值为0xCAFEBABE
+        //     u2             minor_version;//版本号，用来标记class的版本
+        //     u2             major_version;//版本号，用来标记class的版本
+        //     u2             constant_pool_count;//静态池大小，是静态池对象数量+1
+        //     cp_info        constant_pool[constant_pool_count-1];//静态池对象，有效索引是1 ~ count-1
+        //     u2             access_flags;//public、final等描述
+        //     u2             this_class;//当前类的信息
+        //     u2             super_class;//父类的信息
+        //     u2             interfaces_count;//接口数量
+        //     u2             interfaces[interfaces_count];//接口对象
+        //     u2             fields_count;//字段数量
+        //     field_info     fields[fields_count];//字段对象
+        //     u2             methods_count;//方法数量
+        //     method_info    methods[methods_count];//方法对象
+        //     u2             attributes_count;//属性数量
+        //     attribute_info attributes[attributes_count];//属性对象
+        // }
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(bout);
-
         try {
             /*
              * Write all the items of the "ClassFile" structure.
              * See JVMS section 4.1.
              */
-                                        // u4 magic;
+            // u4 magic;
             dout.writeInt(0xCAFEBABE);
-                                        // u2 minor_version;
+            // u2 minor_version;
             dout.writeShort(CLASSFILE_MINOR_VERSION);
-                                        // u2 major_version;
+            // u2 major_version;
             dout.writeShort(CLASSFILE_MAJOR_VERSION);
-
             cp.write(dout);             // (write constant pool)
 
-                                        // u2 access_flags;
+            // u2 access_flags;
             dout.writeShort(accessFlags);
-                                        // u2 this_class;
+            // u2 this_class;
             dout.writeShort(cp.getClass(dotToSlash(className)));
-                                        // u2 super_class;
+            // u2 super_class;
             dout.writeShort(cp.getClass(superclassName));
 
-                                        // u2 interfaces_count;
+            // u2 interfaces_count;
             dout.writeShort(interfaces.length);
-                                        // u2 interfaces[interfaces_count];
+            // u2 interfaces[interfaces_count];
             for (Class<?> intf : interfaces) {
-                dout.writeShort(cp.getClass(
-                    dotToSlash(intf.getName())));
+                dout.writeShort(cp.getClass(dotToSlash(intf.getName())));
             }
 
-                                        // u2 fields_count;
+            // u2 fields_count;
             dout.writeShort(fields.size());
-                                        // field_info fields[fields_count];
+            // field_info fields[fields_count];
             for (FieldInfo f : fields) {
                 f.write(dout);
             }
 
-                                        // u2 methods_count;
+            // u2 methods_count;
             dout.writeShort(methods.size());
-                                        // method_info methods[methods_count];
+            // method_info methods[methods_count];
             for (MethodInfo m : methods) {
                 m.write(dout);
             }
 
-                                         // u2 attributes_count;
+            // u2 attributes_count;
             dout.writeShort(0); // (no ClassFile attributes for proxy classes)
 
         } catch (IOException e) {
@@ -575,7 +614,7 @@ class ProxyGenerator {
      * Add another method to be proxied, either by creating a new
      * ProxyMethod object or augmenting an old one for a duplicate
      * method.
-     *
+     * <p>
      * "fromClass" indicates the proxy interface that the method was
      * found through, which may be different from (a subinterface of)
      * the method's "declaring class".  Note that the first Method
@@ -602,13 +641,10 @@ class ProxyGenerator {
                      * overridden methods.
                      */
                     List<Class<?>> legalExceptions = new ArrayList<>();
-                    collectCompatibleTypes(
-                        exceptionTypes, pm.exceptionTypes, legalExceptions);
-                    collectCompatibleTypes(
-                        pm.exceptionTypes, exceptionTypes, legalExceptions);
+                    collectCompatibleTypes(exceptionTypes, pm.exceptionTypes, legalExceptions);
+                    collectCompatibleTypes(pm.exceptionTypes, exceptionTypes, legalExceptions);
                     pm.exceptionTypes = new Class<?>[legalExceptions.size()];
-                    pm.exceptionTypes =
-                        legalExceptions.toArray(pm.exceptionTypes);
+                    pm.exceptionTypes = legalExceptions.toArray(pm.exceptionTypes);
                     return;
                 }
             }
@@ -616,15 +652,14 @@ class ProxyGenerator {
             sigmethods = new ArrayList<>(3);
             proxyMethods.put(sig, sigmethods);
         }
-        sigmethods.add(new ProxyMethod(name, parameterTypes, returnType,
-                                       exceptionTypes, fromClass));
+        sigmethods.add(new ProxyMethod(name, parameterTypes, returnType, exceptionTypes, fromClass));
     }
 
     /**
      * For a given set of proxy methods with the same signature, check
      * that their return types are compatible according to the Proxy
      * specification.
-     *
+     * <p>
      * Specifically, if there is more than one such method, then all
      * of the return types must be reference types, and there must be
      * one return type that is assignable to each of the rest of them.
@@ -645,16 +680,16 @@ class ProxyGenerator {
          */
         LinkedList<Class<?>> uncoveredReturnTypes = new LinkedList<>();
 
-    nextNewReturnType:
+        nextNewReturnType:
         for (ProxyMethod pm : methods) {
             Class<?> newReturnType = pm.returnType;
             if (newReturnType.isPrimitive()) {
                 throw new IllegalArgumentException(
-                    "methods with same signature " +
-                    getFriendlyMethodSignature(pm.methodName,
-                                               pm.parameterTypes) +
-                    " but incompatible return types: " +
-                    newReturnType.getName() + " and others");
+                        "methods with same signature " +
+                                getFriendlyMethodSignature(pm.methodName,
+                                        pm.parameterTypes) +
+                                " but incompatible return types: " +
+                                newReturnType.getName() + " and others");
             }
             boolean added = false;
 
@@ -709,9 +744,9 @@ class ProxyGenerator {
         if (uncoveredReturnTypes.size() > 1) {
             ProxyMethod pm = methods.get(0);
             throw new IllegalArgumentException(
-                "methods with same signature " +
-                getFriendlyMethodSignature(pm.methodName, pm.parameterTypes) +
-                " but incompatible return types: " + uncoveredReturnTypes);
+                    "methods with same signature " +
+                            getFriendlyMethodSignature(pm.methodName, pm.parameterTypes) +
+                            " but incompatible return types: " + uncoveredReturnTypes);
         }
     }
 
@@ -743,13 +778,13 @@ class ProxyGenerator {
              * Write all the items of the "field_info" structure.
              * See JVMS section 4.5.
              */
-                                        // u2 access_flags;
+            // u2 access_flags;
             out.writeShort(accessFlags);
-                                        // u2 name_index;
+            // u2 name_index;
             out.writeShort(cp.getUtf8(name));
-                                        // u2 descriptor_index;
+            // u2 descriptor_index;
             out.writeShort(cp.getUtf8(descriptor));
-                                        // u2 attributes_count;
+            // u2 attributes_count;
             out.writeShort(0);  // (no field_info attributes for proxy classes)
         }
     }
@@ -766,14 +801,15 @@ class ProxyGenerator {
         public short catchType;
 
         public ExceptionTableEntry(short startPc, short endPc,
-                                   short handlerPc, short catchType)
-        {
+                                   short handlerPc, short catchType) {
             this.startPc = startPc;
             this.endPc = endPc;
             this.handlerPc = handlerPc;
             this.catchType = catchType;
         }
-    };
+    }
+
+    ;
 
     /**
      * A MethodInfo object contains information about a particular method
@@ -788,7 +824,7 @@ class ProxyGenerator {
         public short maxLocals;
         public ByteArrayOutputStream code = new ByteArrayOutputStream();
         public List<ExceptionTableEntry> exceptionTable =
-            new ArrayList<ExceptionTableEntry>();
+                new ArrayList<ExceptionTableEntry>();
         public short[] declaredExceptions;
 
         public MethodInfo(String name, String descriptor, int accessFlags) {
@@ -811,53 +847,53 @@ class ProxyGenerator {
              * Write all the items of the "method_info" structure.
              * See JVMS section 4.6.
              */
-                                        // u2 access_flags;
+            // u2 access_flags;
             out.writeShort(accessFlags);
-                                        // u2 name_index;
+            // u2 name_index;
             out.writeShort(cp.getUtf8(name));
-                                        // u2 descriptor_index;
+            // u2 descriptor_index;
             out.writeShort(cp.getUtf8(descriptor));
-                                        // u2 attributes_count;
+            // u2 attributes_count;
             out.writeShort(2);  // (two method_info attributes:)
 
             // Write "Code" attribute. See JVMS section 4.7.3.
 
-                                        // u2 attribute_name_index;
+            // u2 attribute_name_index;
             out.writeShort(cp.getUtf8("Code"));
-                                        // u4 attribute_length;
+            // u4 attribute_length;
             out.writeInt(12 + code.size() + 8 * exceptionTable.size());
-                                        // u2 max_stack;
+            // u2 max_stack;
             out.writeShort(maxStack);
-                                        // u2 max_locals;
+            // u2 max_locals;
             out.writeShort(maxLocals);
-                                        // u2 code_length;
+            // u2 code_length;
             out.writeInt(code.size());
-                                        // u1 code[code_length];
+            // u1 code[code_length];
             code.writeTo(out);
-                                        // u2 exception_table_length;
+            // u2 exception_table_length;
             out.writeShort(exceptionTable.size());
             for (ExceptionTableEntry e : exceptionTable) {
-                                        // u2 start_pc;
+                // u2 start_pc;
                 out.writeShort(e.startPc);
-                                        // u2 end_pc;
+                // u2 end_pc;
                 out.writeShort(e.endPc);
-                                        // u2 handler_pc;
+                // u2 handler_pc;
                 out.writeShort(e.handlerPc);
-                                        // u2 catch_type;
+                // u2 catch_type;
                 out.writeShort(e.catchType);
             }
-                                        // u2 attributes_count;
+            // u2 attributes_count;
             out.writeShort(0);
 
             // write "Exceptions" attribute.  See JVMS section 4.7.4.
 
-                                        // u2 attribute_name_index;
+            // u2 attribute_name_index;
             out.writeShort(cp.getUtf8("Exceptions"));
-                                        // u4 attributes_length;
+            // u4 attributes_length;
             out.writeInt(2 + 2 * declaredExceptions.length);
-                                        // u2 number_of_exceptions;
+            // u2 number_of_exceptions;
             out.writeShort(declaredExceptions.length);
-                        // u2 exception_index_table[number_of_exceptions];
+            // u2 exception_index_table[number_of_exceptions];
             for (short value : declaredExceptions) {
                 out.writeShort(value);
             }
@@ -879,10 +915,15 @@ class ProxyGenerator {
         public Class<?> fromClass;
         public String methodFieldName;
 
-        private ProxyMethod(String methodName, Class<?>[] parameterTypes,
-                            Class<?> returnType, Class<?>[] exceptionTypes,
-                            Class<?> fromClass)
-        {
+        /**
+         *
+         * @param methodName  methodName
+         * @param parameterTypes parameterTypes
+         * @param returnType returnType
+         * @param exceptionTypes exceptionTypes
+         * @param fromClass fromClass
+         */
+        private ProxyMethod(String methodName, Class<?>[] parameterTypes, Class<?> returnType, Class<?>[] exceptionTypes, Class<?> fromClass) {
             this.methodName = methodName;
             this.parameterTypes = parameterTypes;
             this.returnType = returnType;
@@ -898,7 +939,7 @@ class ProxyGenerator {
         private MethodInfo generateMethod() throws IOException {
             String desc = getMethodDescriptor(parameterTypes, returnType);
             MethodInfo minfo = new MethodInfo(methodName, desc,
-                ACC_PUBLIC | ACC_FINAL);
+                    ACC_PUBLIC | ACC_FINAL);
 
             int[] parameterSlot = new int[parameterTypes.length];
             int nextSlot = 1;
@@ -915,15 +956,15 @@ class ProxyGenerator {
 
             out.writeByte(opc_getfield);
             out.writeShort(cp.getFieldRef(
-                superclassName,
-                handlerFieldName, "Ljava/lang/reflect/InvocationHandler;"));
+                    superclassName,
+                    handlerFieldName, "Ljava/lang/reflect/InvocationHandler;"));
 
             code_aload(0, out);
 
             out.writeByte(opc_getstatic);
             out.writeShort(cp.getFieldRef(
-                dotToSlash(className),
-                methodFieldName, "Ljava/lang/reflect/Method;"));
+                    dotToSlash(className),
+                    methodFieldName, "Ljava/lang/reflect/Method;"));
 
             if (parameterTypes.length > 0) {
 
@@ -949,10 +990,10 @@ class ProxyGenerator {
 
             out.writeByte(opc_invokeinterface);
             out.writeShort(cp.getInterfaceMethodRef(
-                "java/lang/reflect/InvocationHandler",
-                "invoke",
-                "(Ljava/lang/Object;Ljava/lang/reflect/Method;" +
-                    "[Ljava/lang/Object;)Ljava/lang/Object;"));
+                    "java/lang/reflect/InvocationHandler",
+                    "invoke",
+                    "(Ljava/lang/Object;Ljava/lang/reflect/Method;" +
+                            "[Ljava/lang/Object;)Ljava/lang/Object;"));
             out.writeByte(4);
             out.writeByte(0);
 
@@ -974,8 +1015,8 @@ class ProxyGenerator {
 
                 for (Class<?> ex : catchList) {
                     minfo.exceptionTable.add(new ExceptionTableEntry(
-                        tryBegin, tryEnd, pc,
-                        cp.getClass(dotToSlash(ex.getName()))));
+                            tryBegin, tryEnd, pc,
+                            cp.getClass(dotToSlash(ex.getName()))));
                 }
 
                 out.writeByte(opc_athrow);
@@ -983,13 +1024,13 @@ class ProxyGenerator {
                 pc = (short) minfo.code.size();
 
                 minfo.exceptionTable.add(new ExceptionTableEntry(
-                    tryBegin, tryEnd, pc, cp.getClass("java/lang/Throwable")));
+                        tryBegin, tryEnd, pc, cp.getClass("java/lang/Throwable")));
 
                 code_astore(localSlot0, out);
 
                 out.writeByte(opc_new);
                 out.writeShort(cp.getClass(
-                    "java/lang/reflect/UndeclaredThrowableException"));
+                        "java/lang/reflect/UndeclaredThrowableException"));
 
                 out.writeByte(opc_dup);
 
@@ -998,8 +1039,8 @@ class ProxyGenerator {
                 out.writeByte(opc_invokespecial);
 
                 out.writeShort(cp.getMethodRef(
-                    "java/lang/reflect/UndeclaredThrowableException",
-                    "<init>", "(Ljava/lang/Throwable;)V"));
+                        "java/lang/reflect/UndeclaredThrowableException",
+                        "<init>", "(Ljava/lang/Throwable;)V"));
 
                 out.writeByte(opc_athrow);
             }
@@ -1013,7 +1054,7 @@ class ProxyGenerator {
             minfo.declaredExceptions = new short[exceptionTypes.length];
             for (int i = 0; i < exceptionTypes.length; i++) {
                 minfo.declaredExceptions[i] = cp.getClass(
-                    dotToSlash(exceptionTypes[i].getName()));
+                        dotToSlash(exceptionTypes[i].getName()));
             }
 
             return minfo;
@@ -1028,17 +1069,15 @@ class ProxyGenerator {
          */
         private void codeWrapArgument(Class<?> type, int slot,
                                       DataOutputStream out)
-            throws IOException
-        {
+                throws IOException {
             if (type.isPrimitive()) {
                 PrimitiveTypeInfo prim = PrimitiveTypeInfo.get(type);
 
                 if (type == int.class ||
-                    type == boolean.class ||
-                    type == byte.class ||
-                    type == char.class ||
-                    type == short.class)
-                {
+                        type == boolean.class ||
+                        type == byte.class ||
+                        type == char.class ||
+                        type == short.class) {
                     code_iload(slot, out);
                 } else if (type == long.class) {
                     code_lload(slot, out);
@@ -1052,8 +1091,8 @@ class ProxyGenerator {
 
                 out.writeByte(opc_invokestatic);
                 out.writeShort(cp.getMethodRef(
-                    prim.wrapperClassName,
-                    "valueOf", prim.wrapperValueOfDesc));
+                        prim.wrapperClassName,
+                        "valueOf", prim.wrapperValueOfDesc));
 
             } else {
 
@@ -1068,8 +1107,7 @@ class ProxyGenerator {
          * supplied stream.
          */
         private void codeUnwrapReturnValue(Class<?> type, DataOutputStream out)
-            throws IOException
-        {
+                throws IOException {
             if (type.isPrimitive()) {
                 PrimitiveTypeInfo prim = PrimitiveTypeInfo.get(type);
 
@@ -1078,15 +1116,14 @@ class ProxyGenerator {
 
                 out.writeByte(opc_invokevirtual);
                 out.writeShort(cp.getMethodRef(
-                    prim.wrapperClassName,
-                    prim.unwrapMethodName, prim.unwrapMethodDesc));
+                        prim.wrapperClassName,
+                        prim.unwrapMethodName, prim.unwrapMethodDesc));
 
                 if (type == int.class ||
-                    type == boolean.class ||
-                    type == byte.class ||
-                    type == char.class ||
-                    type == short.class)
-                {
+                        type == boolean.class ||
+                        type == byte.class ||
+                        type == char.class ||
+                        type == short.class) {
                     out.writeByte(opc_ireturn);
                 } else if (type == long.class) {
                     out.writeByte(opc_lreturn);
@@ -1113,8 +1150,7 @@ class ProxyGenerator {
          * to the supplied stream.
          */
         private void codeFieldInitialization(DataOutputStream out)
-            throws IOException
-        {
+                throws IOException {
             codeClassForName(fromClass, out);
 
             code_ldc(cp.getString(methodName), out);
@@ -1132,11 +1168,11 @@ class ProxyGenerator {
 
                 if (parameterTypes[i].isPrimitive()) {
                     PrimitiveTypeInfo prim =
-                        PrimitiveTypeInfo.get(parameterTypes[i]);
+                            PrimitiveTypeInfo.get(parameterTypes[i]);
 
                     out.writeByte(opc_getstatic);
                     out.writeShort(cp.getFieldRef(
-                        prim.wrapperClassName, "TYPE", "Ljava/lang/Class;"));
+                            prim.wrapperClassName, "TYPE", "Ljava/lang/Class;"));
 
                 } else {
                     codeClassForName(parameterTypes[i], out);
@@ -1147,15 +1183,15 @@ class ProxyGenerator {
 
             out.writeByte(opc_invokevirtual);
             out.writeShort(cp.getMethodRef(
-                "java/lang/Class",
-                "getMethod",
-                "(Ljava/lang/String;[Ljava/lang/Class;)" +
-                "Ljava/lang/reflect/Method;"));
+                    "java/lang/Class",
+                    "getMethod",
+                    "(Ljava/lang/String;[Ljava/lang/Class;)" +
+                            "Ljava/lang/reflect/Method;"));
 
             out.writeByte(opc_putstatic);
             out.writeShort(cp.getFieldRef(
-                dotToSlash(className),
-                methodFieldName, "Ljava/lang/reflect/Method;"));
+                    dotToSlash(className),
+                    methodFieldName, "Ljava/lang/reflect/Method;"));
         }
     }
 
@@ -1163,27 +1199,16 @@ class ProxyGenerator {
      * Generate the constructor method for the proxy class.
      */
     private MethodInfo generateConstructor() throws IOException {
-        MethodInfo minfo = new MethodInfo(
-            "<init>", "(Ljava/lang/reflect/InvocationHandler;)V",
-            ACC_PUBLIC);
-
+        MethodInfo minfo = new MethodInfo("<init>", "(Ljava/lang/reflect/InvocationHandler;)V", ACC_PUBLIC);
         DataOutputStream out = new DataOutputStream(minfo.code);
-
         code_aload(0, out);
-
         code_aload(1, out);
-
         out.writeByte(opc_invokespecial);
-        out.writeShort(cp.getMethodRef(
-            superclassName,
-            "<init>", "(Ljava/lang/reflect/InvocationHandler;)V"));
-
+        out.writeShort(cp.getMethodRef(superclassName, "<init>", "(Ljava/lang/reflect/InvocationHandler;)V"));
         out.writeByte(opc_return);
-
         minfo.maxStack = 10;
         minfo.maxLocals = 2;
         minfo.declaredExceptions = new short[0];
-
         return minfo;
     }
 
@@ -1192,7 +1217,7 @@ class ProxyGenerator {
      */
     private MethodInfo generateStaticInitializer() throws IOException {
         MethodInfo minfo = new MethodInfo(
-            "<clinit>", "()V", ACC_STATIC);
+                "<clinit>", "()V", ACC_STATIC);
 
         int localSlot0 = 1;
         short pc, tryBegin = 0, tryEnd;
@@ -1210,8 +1235,8 @@ class ProxyGenerator {
         tryEnd = pc = (short) minfo.code.size();
 
         minfo.exceptionTable.add(new ExceptionTableEntry(
-            tryBegin, tryEnd, pc,
-            cp.getClass("java/lang/NoSuchMethodException")));
+                tryBegin, tryEnd, pc,
+                cp.getClass("java/lang/NoSuchMethodException")));
 
         code_astore(localSlot0, out);
 
@@ -1224,19 +1249,19 @@ class ProxyGenerator {
 
         out.writeByte(opc_invokevirtual);
         out.writeShort(cp.getMethodRef(
-            "java/lang/Throwable", "getMessage", "()Ljava/lang/String;"));
+                "java/lang/Throwable", "getMessage", "()Ljava/lang/String;"));
 
         out.writeByte(opc_invokespecial);
         out.writeShort(cp.getMethodRef(
-            "java/lang/NoSuchMethodError", "<init>", "(Ljava/lang/String;)V"));
+                "java/lang/NoSuchMethodError", "<init>", "(Ljava/lang/String;)V"));
 
         out.writeByte(opc_athrow);
 
         pc = (short) minfo.code.size();
 
         minfo.exceptionTable.add(new ExceptionTableEntry(
-            tryBegin, tryEnd, pc,
-            cp.getClass("java/lang/ClassNotFoundException")));
+                tryBegin, tryEnd, pc,
+                cp.getClass("java/lang/ClassNotFoundException")));
 
         code_astore(localSlot0, out);
 
@@ -1249,12 +1274,12 @@ class ProxyGenerator {
 
         out.writeByte(opc_invokevirtual);
         out.writeShort(cp.getMethodRef(
-            "java/lang/Throwable", "getMessage", "()Ljava/lang/String;"));
+                "java/lang/Throwable", "getMessage", "()Ljava/lang/String;"));
 
         out.writeByte(opc_invokespecial);
         out.writeShort(cp.getMethodRef(
-            "java/lang/NoClassDefFoundError",
-            "<init>", "(Ljava/lang/String;)V"));
+                "java/lang/NoClassDefFoundError",
+                "<init>", "(Ljava/lang/String;)V"));
 
         out.writeByte(opc_athrow);
 
@@ -1281,32 +1306,27 @@ class ProxyGenerator {
      */
 
     private void code_iload(int lvar, DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         codeLocalLoadStore(lvar, opc_iload, opc_iload_0, out);
     }
 
     private void code_lload(int lvar, DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         codeLocalLoadStore(lvar, opc_lload, opc_lload_0, out);
     }
 
     private void code_fload(int lvar, DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         codeLocalLoadStore(lvar, opc_fload, opc_fload_0, out);
     }
 
     private void code_dload(int lvar, DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         codeLocalLoadStore(lvar, opc_dload, opc_dload_0, out);
     }
 
     private void code_aload(int lvar, DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         codeLocalLoadStore(lvar, opc_aload, opc_aload_0, out);
     }
 
@@ -1335,15 +1355,14 @@ class ProxyGenerator {
 //  }
 
     private void code_astore(int lvar, DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         codeLocalLoadStore(lvar, opc_astore, opc_astore_0, out);
     }
 
     /**
      * Generate code for a load or store instruction for the given local
      * variable.  The code is written to the supplied stream.
-     *
+     * <p>
      * "opcode" indicates the opcode form of the desired load or store
      * instruction that takes an explicit local variable index, and
      * "opcode_0" indicates the corresponding form of the instruction
@@ -1351,8 +1370,7 @@ class ProxyGenerator {
      */
     private void codeLocalLoadStore(int lvar, int opcode, int opcode_0,
                                     DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         assert lvar >= 0 && lvar <= 0xFFFF;
         if (lvar <= 3) {
             out.writeByte(opcode_0 + lvar);
@@ -1376,8 +1394,7 @@ class ProxyGenerator {
      * into an unsigned byte).  The code is written to the supplied stream.
      */
     private void code_ldc(int index, DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         assert index >= 0 && index <= 0xFFFF;
         if (index <= 0xFF) {
             out.writeByte(opc_ldc);
@@ -1395,8 +1412,7 @@ class ProxyGenerator {
      * supplied stream.
      */
     private void code_ipush(int value, DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         if (value >= -1 && value <= 5) {
             out.writeByte(opc_iconst_0 + value);
         } else if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
@@ -1417,14 +1433,13 @@ class ProxyGenerator {
      * may caused the checked ClassNotFoundException to be thrown.
      */
     private void codeClassForName(Class<?> cl, DataOutputStream out)
-        throws IOException
-    {
+            throws IOException {
         code_ldc(cp.getString(cl.getName()), out);
 
         out.writeByte(opc_invokestatic);
         out.writeShort(cp.getMethodRef(
-            "java/lang/Class",
-            "forName", "(Ljava/lang/String;)Ljava/lang/Class;"));
+                "java/lang/Class",
+                "forName", "(Ljava/lang/String;)Ljava/lang/Class;"));
     }
 
 
@@ -1448,10 +1463,9 @@ class ProxyGenerator {
      * parameter types and return type.  See JVMS section 4.3.3.
      */
     private static String getMethodDescriptor(Class<?>[] parameterTypes,
-                                              Class<?> returnType)
-    {
+                                              Class<?> returnType) {
         return getParameterDescriptors(parameterTypes) +
-            ((returnType == void.class) ? "V" : getFieldType(returnType));
+                ((returnType == void.class) ? "V" : getFieldType(returnType));
     }
 
     /**
@@ -1497,8 +1511,7 @@ class ProxyGenerator {
      * method with the given name and parameter types.
      */
     private static String getFriendlyMethodSignature(String name,
-                                                     Class<?>[] parameterTypes)
-    {
+                                                     Class<?>[] parameterTypes) {
         StringBuilder sig = new StringBuilder(name);
         sig.append('(');
         for (int i = 0; i < parameterTypes.length; i++) {
@@ -1524,7 +1537,7 @@ class ProxyGenerator {
      * Return the number of abstract "words", or consecutive local variable
      * indexes, required to contain a value of the given type.  See JVMS
      * section 3.6.1.
-     *
+     * <p>
      * Note that the original version of the JVMS contained a definition of
      * this abstract notion of a "word" in section 3.4, but that definition
      * was removed for the second edition.
@@ -1541,18 +1554,17 @@ class ProxyGenerator {
      * Add to the given list all of the types in the "from" array that
      * are not already contained in the list and are assignable to at
      * least one of the types in the "with" array.
-     *
+     * <p>
      * This method is useful for computing the greatest common set of
      * declared exceptions from duplicate methods inherited from
      * different interfaces.
      */
     private static void collectCompatibleTypes(Class<?>[] from,
                                                Class<?>[] with,
-                                               List<Class<?>> list)
-    {
-        for (Class<?> fc: from) {
+                                               List<Class<?>> list) {
+        for (Class<?> fc : from) {
             if (!list.contains(fc)) {
-                for (Class<?> wc: with) {
+                for (Class<?> wc : with) {
                     if (wc.isAssignableFrom(fc)) {
                         list.add(fc);
                         break;
@@ -1568,30 +1580,30 @@ class ProxyGenerator {
      * handler's invoke method and rethrown intact in the method's
      * implementation before catching other Throwables and wrapping them
      * in UndeclaredThrowableExceptions.
-     *
+     * <p>
      * The exceptions to be caught are returned in a List object.  Each
      * exception in the returned list is guaranteed to not be a subclass of
      * any of the other exceptions in the list, so the catch blocks for
      * these exceptions may be generated in any order relative to each other.
-     *
+     * <p>
      * Error and RuntimeException are each always contained by the returned
      * list (if none of their superclasses are contained), since those
      * unchecked exceptions should always be rethrown intact, and thus their
      * subclasses will never appear in the returned list.
-     *
+     * <p>
      * The returned List will be empty if java.lang.Throwable is in the
      * given list of declared exceptions, indicating that no exceptions
      * need to be caught.
      */
     private static List<Class<?>> computeUniqueCatchList(Class<?>[] exceptions) {
         List<Class<?>> uniqueList = new ArrayList<>();
-                                                // unique exceptions to catch
+        // unique exceptions to catch
 
         uniqueList.add(Error.class);            // always catch/rethrow these
         uniqueList.add(RuntimeException.class);
 
-    nextException:
-        for (Class<?> ex: exceptions) {
+        nextException:
+        for (Class<?> ex : exceptions) {
             if (ex.isAssignableFrom(Throwable.class)) {
                 /*
                  * If Throwable is declared to be thrown by the proxy method,
@@ -1610,7 +1622,7 @@ class ProxyGenerator {
              * Compare this exception against the current list of
              * exceptions that need to be caught:
              */
-            for (int j = 0; j < uniqueList.size();) {
+            for (int j = 0; j < uniqueList.size(); ) {
                 Class<?> ex2 = uniqueList.get(j);
                 if (ex2.isAssignableFrom(ex)) {
                     /*
@@ -1641,22 +1653,33 @@ class ProxyGenerator {
      */
     private static class PrimitiveTypeInfo {
 
-        /** "base type" used in various descriptors (see JVMS section 4.3.2) */
+        /**
+         * "base type" used in various descriptors (see JVMS section 4.3.2)
+         */
         public String baseTypeString;
 
-        /** name of corresponding wrapper class */
+        /**
+         * name of corresponding wrapper class
+         */
         public String wrapperClassName;
 
-        /** method descriptor for wrapper class "valueOf" factory method */
+        /**
+         * method descriptor for wrapper class "valueOf" factory method
+         */
         public String wrapperValueOfDesc;
 
-        /** name of wrapper class method for retrieving primitive value */
+        /**
+         * name of wrapper class method for retrieving primitive value
+         */
         public String unwrapMethodName;
 
-        /** descriptor of same method */
+        /**
+         * descriptor of same method
+         */
         public String unwrapMethodDesc;
 
-        private static Map<Class<?>,PrimitiveTypeInfo> table = new HashMap<>();
+        private static Map<Class<?>, PrimitiveTypeInfo> table = new HashMap<>();
+
         static {
             add(byte.class, Byte.class);
             add(char.class, Character.class);
@@ -1670,18 +1693,18 @@ class ProxyGenerator {
 
         private static void add(Class<?> primitiveClass, Class<?> wrapperClass) {
             table.put(primitiveClass,
-                      new PrimitiveTypeInfo(primitiveClass, wrapperClass));
+                    new PrimitiveTypeInfo(primitiveClass, wrapperClass));
         }
 
         private PrimitiveTypeInfo(Class<?> primitiveClass, Class<?> wrapperClass) {
             assert primitiveClass.isPrimitive();
 
             baseTypeString =
-                Array.newInstance(primitiveClass, 0)
-                .getClass().getName().substring(1);
+                    Array.newInstance(primitiveClass, 0)
+                            .getClass().getName().substring(1);
             wrapperClassName = dotToSlash(wrapperClass.getName());
             wrapperValueOfDesc =
-                "(" + baseTypeString + ")L" + wrapperClassName + ";";
+                    "(" + baseTypeString + ")L" + wrapperClassName + ";";
             unwrapMethodName = primitiveClass.getName() + "Value";
             unwrapMethodDesc = "()" + baseTypeString;
         }
@@ -1699,12 +1722,12 @@ class ProxyGenerator {
      * that constant pool entries will not need to be resorted (for example,
      * by their type, as the Java compiler does), so that the final index
      * value can be assigned and used when an entry is first created.
-     *
+     * <p>
      * Note that new entries cannot be created after the constant pool has
      * been written to a class file.  To prevent such logic errors, a
      * ConstantPool instance can be marked "read only", so that further
      * attempts to add new entries will fail with a runtime exception.
-     *
+     * <p>
      * See JVMS section 4.4 for more information about the constant pool
      * of a class file.
      */
@@ -1712,7 +1735,7 @@ class ProxyGenerator {
 
         /**
          * list of constant pool entries, in constant pool index order.
-         *
+         * <p>
          * This list is used when writing the constant pool to a stream
          * and for assigning the next index value.  Note that element 0
          * of this list corresponds to constant pool index 1.
@@ -1721,13 +1744,15 @@ class ProxyGenerator {
 
         /**
          * maps constant pool data of all types to constant pool indexes.
-         *
+         * <p>
          * This map is used to look up the index of an existing entry for
          * values of all types.
          */
-        private Map<Object,Integer> map = new HashMap<>(16);
+        private Map<Object, Integer> map = new HashMap<>(16);
 
-        /** true if no new constant pool entries may be added */
+        /**
+         * true if no new constant pool entries may be added
+         */
         private boolean readOnly = false;
 
         /**
@@ -1760,7 +1785,7 @@ class ProxyGenerator {
         public short getClass(String name) {
             short utf8Index = getUtf8(name);
             return getIndirect(new IndirectEntry(
-                CONSTANT_CLASS, utf8Index));
+                    CONSTANT_CLASS, utf8Index));
         }
 
         /**
@@ -1769,43 +1794,40 @@ class ProxyGenerator {
         public short getString(String s) {
             short utf8Index = getUtf8(s);
             return getIndirect(new IndirectEntry(
-                CONSTANT_STRING, utf8Index));
+                    CONSTANT_STRING, utf8Index));
         }
 
         /**
          * Get or assign the index for a CONSTANT_FieldRef entry.
          */
         public short getFieldRef(String className,
-                                 String name, String descriptor)
-        {
+                                 String name, String descriptor) {
             short classIndex = getClass(className);
             short nameAndTypeIndex = getNameAndType(name, descriptor);
             return getIndirect(new IndirectEntry(
-                CONSTANT_FIELD, classIndex, nameAndTypeIndex));
+                    CONSTANT_FIELD, classIndex, nameAndTypeIndex));
         }
 
         /**
          * Get or assign the index for a CONSTANT_MethodRef entry.
          */
         public short getMethodRef(String className,
-                                  String name, String descriptor)
-        {
+                                  String name, String descriptor) {
             short classIndex = getClass(className);
             short nameAndTypeIndex = getNameAndType(name, descriptor);
             return getIndirect(new IndirectEntry(
-                CONSTANT_METHOD, classIndex, nameAndTypeIndex));
+                    CONSTANT_METHOD, classIndex, nameAndTypeIndex));
         }
 
         /**
          * Get or assign the index for a CONSTANT_InterfaceMethodRef entry.
          */
         public short getInterfaceMethodRef(String className, String name,
-                                           String descriptor)
-        {
+                                           String descriptor) {
             short classIndex = getClass(className);
             short nameAndTypeIndex = getNameAndType(name, descriptor);
             return getIndirect(new IndirectEntry(
-                CONSTANT_INTERFACEMETHOD, classIndex, nameAndTypeIndex));
+                    CONSTANT_INTERFACEMETHOD, classIndex, nameAndTypeIndex));
         }
 
         /**
@@ -1815,12 +1837,12 @@ class ProxyGenerator {
             short nameIndex = getUtf8(name);
             short descriptorIndex = getUtf8(descriptor);
             return getIndirect(new IndirectEntry(
-                CONSTANT_NAMEANDTYPE, nameIndex, descriptorIndex));
+                    CONSTANT_NAMEANDTYPE, nameIndex, descriptorIndex));
         }
 
         /**
          * Set this ConstantPool instance to be "read only".
-         *
+         * <p>
          * After this method has been called, further requests to get
          * an index for a non-existent entry will cause an InternalError
          * to be thrown instead of creating of the entry.
@@ -1832,7 +1854,7 @@ class ProxyGenerator {
         /**
          * Write this constant pool to a stream as part of
          * the class file format.
-         *
+         * <p>
          * This consists of writing the "constant_pool_count" and
          * "constant_pool[]" items of the "ClassFile" structure, as
          * described in JVMS section 4.1.
@@ -1860,7 +1882,7 @@ class ProxyGenerator {
              */
             if (pool.size() >= 65535) {
                 throw new IllegalArgumentException(
-                    "constant pool size limit exceeded");
+                        "constant pool size limit exceeded");
             }
             return (short) pool.size();
         }
@@ -1869,12 +1891,12 @@ class ProxyGenerator {
          * Get or assign the index for an entry of a type that contains
          * a direct value.  The type of the given object determines the
          * type of the desired entry as follows:
-         *
-         *      java.lang.String        CONSTANT_Utf8
-         *      java.lang.Integer       CONSTANT_Integer
-         *      java.lang.Float         CONSTANT_Float
-         *      java.lang.Long          CONSTANT_Long
-         *      java.lang.Double        CONSTANT_DOUBLE
+         * <p>
+         * java.lang.String        CONSTANT_Utf8
+         * java.lang.Integer       CONSTANT_Integer
+         * java.lang.Float         CONSTANT_Float
+         * java.lang.Long          CONSTANT_Long
+         * java.lang.Double        CONSTANT_DOUBLE
          */
         private short getValue(Object key) {
             Integer index = map.get(key);
@@ -1883,10 +1905,10 @@ class ProxyGenerator {
             } else {
                 if (readOnly) {
                     throw new InternalError(
-                        "late constant pool addition: " + key);
+                            "late constant pool addition: " + key);
                 }
                 short i = addEntry(new ValueEntry(key));
-                map.put(key, (int)i);
+                map.put(key, (int) i);
                 return i;
             }
         }
@@ -1904,7 +1926,7 @@ class ProxyGenerator {
                     throw new InternalError("late constant pool addition");
                 }
                 short i = addEntry(e);
-                map.put(e, (int)i);
+                map.put(e, (int) i);
                 return i;
             }
         }
@@ -1916,14 +1938,14 @@ class ProxyGenerator {
          */
         private abstract static class Entry {
             public abstract void write(DataOutputStream out)
-                throws IOException;
+                    throws IOException;
         }
 
         /**
          * ValueEntry represents a constant pool entry of a type that
          * contains a direct value (see the comments for the "getValue"
          * method for a list of such types).
-         *
+         * <p>
          * ValueEntry objects are not used as keys for their entries in the
          * Map "map", so no useful hashCode or equals methods are defined.
          */
@@ -1959,14 +1981,14 @@ class ProxyGenerator {
         /**
          * IndirectEntry represents a constant pool entry of a type that
          * references other constant pool entries, i.e., the following types:
-         *
-         *      CONSTANT_Class, CONSTANT_String, CONSTANT_Fieldref,
-         *      CONSTANT_Methodref, CONSTANT_InterfaceMethodref, and
-         *      CONSTANT_NameAndType.
-         *
+         * <p>
+         * CONSTANT_Class, CONSTANT_String, CONSTANT_Fieldref,
+         * CONSTANT_Methodref, CONSTANT_InterfaceMethodref, and
+         * CONSTANT_NameAndType.
+         * <p>
          * Each of these entry types contains either one or two indexes of
          * other constant pool entries.
-         *
+         * <p>
          * IndirectEntry objects are used as the keys for their entries in
          * the Map "map", so the hashCode and equals methods are overridden
          * to allow matching.
@@ -2004,10 +2026,9 @@ class ProxyGenerator {
                  * out the second, too.
                  */
                 if (tag == CONSTANT_FIELD ||
-                    tag == CONSTANT_METHOD ||
-                    tag == CONSTANT_INTERFACEMETHOD ||
-                    tag == CONSTANT_NAMEANDTYPE)
-                {
+                        tag == CONSTANT_METHOD ||
+                        tag == CONSTANT_INTERFACEMETHOD ||
+                        tag == CONSTANT_NAMEANDTYPE) {
                     out.writeShort(index1);
                 }
             }
@@ -2020,8 +2041,7 @@ class ProxyGenerator {
                 if (obj instanceof IndirectEntry) {
                     IndirectEntry other = (IndirectEntry) obj;
                     if (tag == other.tag &&
-                        index0 == other.index0 && index1 == other.index1)
-                    {
+                            index0 == other.index0 && index1 == other.index1) {
                         return true;
                     }
                 }

@@ -99,7 +99,7 @@ public interface InvocationHandler {
      * @param proxy  代理对象引用
      * @param method 正在执行目标的方法
      * @param args   目标方法执行时的入参
-     * @return  代理对象
+     * @return 代理对象
      * @throws Throwable e
      */
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable;

@@ -57,6 +57,7 @@ import static java.lang.String.UTF16;
  * @since 1.0
  */
 public final class Integer extends Number implements Comparable<Integer> {
+
     /**
      * A constant holding the minimum value an {@code int} can
      * have, -2<sup>31</sup>.
@@ -601,29 +602,21 @@ public final class Integer extends Number implements Comparable<Integer> {
      * @exception  NumberFormatException if the {@code String}
      *             does not contain a parsable {@code int}.
      */
-    public static int parseInt(String s, int radix)
-                throws NumberFormatException
-    {
+    public static int parseInt(String s, int radix) throws NumberFormatException {
         /*
          * WARNING: This method may be invoked early during VM initialization
          * before IntegerCache is initialized. Care must be taken to not use
          * the valueOf method.
          */
-
         if (s == null) {
             throw new NumberFormatException("null");
         }
-
         if (radix < Character.MIN_RADIX) {
-            throw new NumberFormatException("radix " + radix +
-                                            " less than Character.MIN_RADIX");
+            throw new NumberFormatException("radix " + radix + " less than Character.MIN_RADIX");
         }
-
         if (radix > Character.MAX_RADIX) {
-            throw new NumberFormatException("radix " + radix +
-                                            " greater than Character.MAX_RADIX");
+            throw new NumberFormatException("radix " + radix + " greater than Character.MAX_RADIX");
         }
-
         boolean negative = false;
         int i = 0, len = s.length();
         int limit = -Integer.MAX_VALUE;
@@ -690,8 +683,7 @@ public final class Integer extends Number implements Comparable<Integer> {
      *             {@link java.lang.Character#MAX_RADIX}.
      * @since  9
      */
-    public static int parseInt(CharSequence s, int beginIndex, int endIndex, int radix)
-                throws NumberFormatException {
+    public static int parseInt(CharSequence s, int beginIndex, int endIndex, int radix) throws NumberFormatException {
         s = Objects.requireNonNull(s);
 
         if (beginIndex < 0 || beginIndex > endIndex || endIndex > s.length()) {
@@ -873,8 +865,7 @@ public final class Integer extends Number implements Comparable<Integer> {
      *             {@link java.lang.Character#MAX_RADIX}.
      * @since  9
      */
-    public static int parseUnsignedInt(CharSequence s, int beginIndex, int endIndex, int radix)
-                throws NumberFormatException {
+    public static int parseUnsignedInt(CharSequence s, int beginIndex, int endIndex, int radix) throws NumberFormatException {
         s = Objects.requireNonNull(s);
 
         if (beginIndex < 0 || beginIndex > endIndex || endIndex > s.length()) {
@@ -984,6 +975,7 @@ public final class Integer extends Number implements Comparable<Integer> {
     }
 
     /**
+     * 缓存
      * Cache to support the object identity semantics of autoboxing for values between
      * -128 and 127 (inclusive) as required by JLS.
      *
@@ -993,7 +985,6 @@ public final class Integer extends Number implements Comparable<Integer> {
      * may be set and saved in the private system properties in the
      * jdk.internal.misc.VM class.
      */
-
     private static class IntegerCache {
         static final int low = -128;
         static final int high;
@@ -1002,8 +993,7 @@ public final class Integer extends Number implements Comparable<Integer> {
         static {
             // high value may be configured by property
             int h = 127;
-            String integerCacheHighPropValue =
-                VM.getSavedProperty("java.lang.Integer.IntegerCache.high");
+            String integerCacheHighPropValue = VM.getSavedProperty("java.lang.Integer.IntegerCache.high");
             if (integerCacheHighPropValue != null) {
                 try {
                     int i = parseInt(integerCacheHighPropValue);
@@ -1015,12 +1005,11 @@ public final class Integer extends Number implements Comparable<Integer> {
                 }
             }
             high = h;
-
             cache = new Integer[(high - low) + 1];
             int j = low;
-            for(int k = 0; k < cache.length; k++)
+            for(int k = 0; k < cache.length; k++) {
                 cache[k] = new Integer(j++);
-
+            }
             // range [-128, 127] must be interned (JLS7 5.1.7)
             assert IntegerCache.high >= 127;
         }
@@ -1045,8 +1034,11 @@ public final class Integer extends Number implements Comparable<Integer> {
      */
     @HotSpotIntrinsicCandidate
     public static Integer valueOf(int i) {
-        if (i >= IntegerCache.low && i <= IntegerCache.high)
+        // 是否命中缓存 [-128,127] 最大值可以指定，127是默认
+        if (i >= IntegerCache.low && i <= IntegerCache.high) {
             return IntegerCache.cache[i + (-IntegerCache.low)];
+        }
+        // 创建一个行的Integer
         return new Integer(i);
     }
 
