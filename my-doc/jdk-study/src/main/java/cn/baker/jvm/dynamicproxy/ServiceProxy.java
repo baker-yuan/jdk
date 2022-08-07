@@ -20,6 +20,7 @@ public class ServiceProxy {
         Hello origin = new Hello();
         IHello IHello = (IHello) getInstance(IHello.class, new ProxyHandler<>(origin));
 
+        IHello.sayHi();
         System.out.println(IHello.toString());
 
         // generateProxyClass();
