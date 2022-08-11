@@ -489,7 +489,7 @@ public class Proxy implements java.io.Serializable {
         private static Class<?> defineProxyClass(Module module, List<Class<?>> interfaces) {
             // 代理类package
             String proxyPkg = null;     // package to define proxy class in
-            // 代理类访问 public final
+            // 代理类访问修饰符 public final
             int accessFlags = Modifier.PUBLIC | Modifier.FINAL;
 
             /*
@@ -652,10 +652,11 @@ public class Proxy implements java.io.Serializable {
          * before calling this.
          */
         Constructor<?> build() {
-            //
+            // 获取Class对象
             Class<?> proxyClass = defineProxyClass(module, interfaces);
             final Constructor<?> cons;
             try {
+                // 获取构造函数
                 cons = proxyClass.getConstructor(constructorParams);
             } catch (NoSuchMethodException e) {
                 throw new InternalError(e.toString(), e);
