@@ -91,31 +91,31 @@ class ProxyGenerator {
     private static final int ACC_STATIC = 0x00000008;
     private static final int ACC_FINAL = 0x00000010;
     //  private static final int ACC_SYNCHRONIZED           = 0x00000020;
-//  private static final int ACC_VOLATILE               = 0x00000040;
-//  private static final int ACC_TRANSIENT              = 0x00000080;
-//  private static final int ACC_NATIVE                 = 0x00000100;
-//  private static final int ACC_INTERFACE              = 0x00000200;
-//  private static final int ACC_ABSTRACT               = 0x00000400;
+    //  private static final int ACC_VOLATILE               = 0x00000040;
+    //  private static final int ACC_TRANSIENT              = 0x00000080;
+    //  private static final int ACC_NATIVE                 = 0x00000100;
+    //  private static final int ACC_INTERFACE              = 0x00000200;
+    //  private static final int ACC_ABSTRACT               = 0x00000400;
     private static final int ACC_SUPER = 0x00000020;
-//  private static final int ACC_STRICT                 = 0x00000800;
+    //  private static final int ACC_STRICT                 = 0x00000800;
 
     /* opcodes */
-//  private static final int opc_nop                    = 0;
+    //  private static final int opc_nop                    = 0;
     private static final int opc_aconst_null = 1;
     //  private static final int opc_iconst_m1              = 2;
     private static final int opc_iconst_0 = 3;
     //  private static final int opc_iconst_1               = 4;
-//  private static final int opc_iconst_2               = 5;
-//  private static final int opc_iconst_3               = 6;
-//  private static final int opc_iconst_4               = 7;
-//  private static final int opc_iconst_5               = 8;
-//  private static final int opc_lconst_0               = 9;
-//  private static final int opc_lconst_1               = 10;
-//  private static final int opc_fconst_0               = 11;
-//  private static final int opc_fconst_1               = 12;
-//  private static final int opc_fconst_2               = 13;
-//  private static final int opc_dconst_0               = 14;
-//  private static final int opc_dconst_1               = 15;
+    //  private static final int opc_iconst_2               = 5;
+    //  private static final int opc_iconst_3               = 6;
+    //  private static final int opc_iconst_4               = 7;
+    //  private static final int opc_iconst_5               = 8;
+    //  private static final int opc_lconst_0               = 9;
+    //  private static final int opc_lconst_1               = 10;
+    //  private static final int opc_fconst_0               = 11;
+    //  private static final int opc_fconst_1               = 12;
+    //  private static final int opc_fconst_2               = 13;
+    //  private static final int opc_dconst_0               = 14;
+    //  private static final int opc_dconst_1               = 15;
     private static final int opc_bipush = 16;
     private static final int opc_sipush = 17;
     private static final int opc_ldc = 18;
@@ -128,150 +128,150 @@ class ProxyGenerator {
     private static final int opc_aload = 25;
     private static final int opc_iload_0 = 26;
     //  private static final int opc_iload_1                = 27;
-//  private static final int opc_iload_2                = 28;
-//  private static final int opc_iload_3                = 29;
+    //  private static final int opc_iload_2                = 28;
+    //  private static final int opc_iload_3                = 29;
     private static final int opc_lload_0 = 30;
     //  private static final int opc_lload_1                = 31;
-//  private static final int opc_lload_2                = 32;
-//  private static final int opc_lload_3                = 33;
+    //  private static final int opc_lload_2                = 32;
+    //  private static final int opc_lload_3                = 33;
     private static final int opc_fload_0 = 34;
     //  private static final int opc_fload_1                = 35;
-//  private static final int opc_fload_2                = 36;
-//  private static final int opc_fload_3                = 37;
+    //  private static final int opc_fload_2                = 36;
+    //  private static final int opc_fload_3                = 37;
     private static final int opc_dload_0 = 38;
     //  private static final int opc_dload_1                = 39;
-//  private static final int opc_dload_2                = 40;
-//  private static final int opc_dload_3                = 41;
+    //  private static final int opc_dload_2                = 40;
+    //  private static final int opc_dload_3                = 41;
     private static final int opc_aload_0 = 42;
     //  private static final int opc_aload_1                = 43;
-//  private static final int opc_aload_2                = 44;
-//  private static final int opc_aload_3                = 45;
-//  private static final int opc_iaload                 = 46;
-//  private static final int opc_laload                 = 47;
-//  private static final int opc_faload                 = 48;
-//  private static final int opc_daload                 = 49;
-//  private static final int opc_aaload                 = 50;
-//  private static final int opc_baload                 = 51;
-//  private static final int opc_caload                 = 52;
-//  private static final int opc_saload                 = 53;
-//  private static final int opc_istore                 = 54;
-//  private static final int opc_lstore                 = 55;
-//  private static final int opc_fstore                 = 56;
-//  private static final int opc_dstore                 = 57;
+    //  private static final int opc_aload_2                = 44;
+    //  private static final int opc_aload_3                = 45;
+    //  private static final int opc_iaload                 = 46;
+    //  private static final int opc_laload                 = 47;
+    //  private static final int opc_faload                 = 48;
+    //  private static final int opc_daload                 = 49;
+    //  private static final int opc_aaload                 = 50;
+    //  private static final int opc_baload                 = 51;
+    //  private static final int opc_caload                 = 52;
+    //  private static final int opc_saload                 = 53;
+    //  private static final int opc_istore                 = 54;
+    //  private static final int opc_lstore                 = 55;
+    //  private static final int opc_fstore                 = 56;
+    //  private static final int opc_dstore                 = 57;
     private static final int opc_astore = 58;
     //  private static final int opc_istore_0               = 59;
-//  private static final int opc_istore_1               = 60;
-//  private static final int opc_istore_2               = 61;
-//  private static final int opc_istore_3               = 62;
-//  private static final int opc_lstore_0               = 63;
-//  private static final int opc_lstore_1               = 64;
-//  private static final int opc_lstore_2               = 65;
-//  private static final int opc_lstore_3               = 66;
-//  private static final int opc_fstore_0               = 67;
-//  private static final int opc_fstore_1               = 68;
-//  private static final int opc_fstore_2               = 69;
-//  private static final int opc_fstore_3               = 70;
-//  private static final int opc_dstore_0               = 71;
-//  private static final int opc_dstore_1               = 72;
-//  private static final int opc_dstore_2               = 73;
-//  private static final int opc_dstore_3               = 74;
+    //  private static final int opc_istore_1               = 60;
+    //  private static final int opc_istore_2               = 61;
+    //  private static final int opc_istore_3               = 62;
+    //  private static final int opc_lstore_0               = 63;
+    //  private static final int opc_lstore_1               = 64;
+    //  private static final int opc_lstore_2               = 65;
+    //  private static final int opc_lstore_3               = 66;
+    //  private static final int opc_fstore_0               = 67;
+    //  private static final int opc_fstore_1               = 68;
+    //  private static final int opc_fstore_2               = 69;
+    //  private static final int opc_fstore_3               = 70;
+    //  private static final int opc_dstore_0               = 71;
+    //  private static final int opc_dstore_1               = 72;
+    //  private static final int opc_dstore_2               = 73;
+    //  private static final int opc_dstore_3               = 74;
     private static final int opc_astore_0 = 75;
     //  private static final int opc_astore_1               = 76;
-//  private static final int opc_astore_2               = 77;
-//  private static final int opc_astore_3               = 78;
-//  private static final int opc_iastore                = 79;
-//  private static final int opc_lastore                = 80;
-//  private static final int opc_fastore                = 81;
-//  private static final int opc_dastore                = 82;
+    //  private static final int opc_astore_2               = 77;
+    //  private static final int opc_astore_3               = 78;
+    //  private static final int opc_iastore                = 79;
+    //  private static final int opc_lastore                = 80;
+    //  private static final int opc_fastore                = 81;
+    //  private static final int opc_dastore                = 82;
     private static final int opc_aastore = 83;
     //  private static final int opc_bastore                = 84;
-//  private static final int opc_castore                = 85;
-//  private static final int opc_sastore                = 86;
+    //  private static final int opc_castore                = 85;
+    //  private static final int opc_sastore                = 86;
     private static final int opc_pop = 87;
     //  private static final int opc_pop2                   = 88;
     private static final int opc_dup = 89;
     //  private static final int opc_dup_x1                 = 90;
-//  private static final int opc_dup_x2                 = 91;
-//  private static final int opc_dup2                   = 92;
-//  private static final int opc_dup2_x1                = 93;
-//  private static final int opc_dup2_x2                = 94;
-//  private static final int opc_swap                   = 95;
-//  private static final int opc_iadd                   = 96;
-//  private static final int opc_ladd                   = 97;
-//  private static final int opc_fadd                   = 98;
-//  private static final int opc_dadd                   = 99;
-//  private static final int opc_isub                   = 100;
-//  private static final int opc_lsub                   = 101;
-//  private static final int opc_fsub                   = 102;
-//  private static final int opc_dsub                   = 103;
-//  private static final int opc_imul                   = 104;
-//  private static final int opc_lmul                   = 105;
-//  private static final int opc_fmul                   = 106;
-//  private static final int opc_dmul                   = 107;
-//  private static final int opc_idiv                   = 108;
-//  private static final int opc_ldiv                   = 109;
-//  private static final int opc_fdiv                   = 110;
-//  private static final int opc_ddiv                   = 111;
-//  private static final int opc_irem                   = 112;
-//  private static final int opc_lrem                   = 113;
-//  private static final int opc_frem                   = 114;
-//  private static final int opc_drem                   = 115;
-//  private static final int opc_ineg                   = 116;
-//  private static final int opc_lneg                   = 117;
-//  private static final int opc_fneg                   = 118;
-//  private static final int opc_dneg                   = 119;
-//  private static final int opc_ishl                   = 120;
-//  private static final int opc_lshl                   = 121;
-//  private static final int opc_ishr                   = 122;
-//  private static final int opc_lshr                   = 123;
-//  private static final int opc_iushr                  = 124;
-//  private static final int opc_lushr                  = 125;
-//  private static final int opc_iand                   = 126;
-//  private static final int opc_land                   = 127;
-//  private static final int opc_ior                    = 128;
-//  private static final int opc_lor                    = 129;
-//  private static final int opc_ixor                   = 130;
-//  private static final int opc_lxor                   = 131;
-//  private static final int opc_iinc                   = 132;
-//  private static final int opc_i2l                    = 133;
-//  private static final int opc_i2f                    = 134;
-//  private static final int opc_i2d                    = 135;
-//  private static final int opc_l2i                    = 136;
-//  private static final int opc_l2f                    = 137;
-//  private static final int opc_l2d                    = 138;
-//  private static final int opc_f2i                    = 139;
-//  private static final int opc_f2l                    = 140;
-//  private static final int opc_f2d                    = 141;
-//  private static final int opc_d2i                    = 142;
-//  private static final int opc_d2l                    = 143;
-//  private static final int opc_d2f                    = 144;
-//  private static final int opc_i2b                    = 145;
-//  private static final int opc_i2c                    = 146;
-//  private static final int opc_i2s                    = 147;
-//  private static final int opc_lcmp                   = 148;
-//  private static final int opc_fcmpl                  = 149;
-//  private static final int opc_fcmpg                  = 150;
-//  private static final int opc_dcmpl                  = 151;
-//  private static final int opc_dcmpg                  = 152;
-//  private static final int opc_ifeq                   = 153;
-//  private static final int opc_ifne                   = 154;
-//  private static final int opc_iflt                   = 155;
-//  private static final int opc_ifge                   = 156;
-//  private static final int opc_ifgt                   = 157;
-//  private static final int opc_ifle                   = 158;
-//  private static final int opc_if_icmpeq              = 159;
-//  private static final int opc_if_icmpne              = 160;
-//  private static final int opc_if_icmplt              = 161;
-//  private static final int opc_if_icmpge              = 162;
-//  private static final int opc_if_icmpgt              = 163;
-//  private static final int opc_if_icmple              = 164;
-//  private static final int opc_if_acmpeq              = 165;
-//  private static final int opc_if_acmpne              = 166;
-//  private static final int opc_goto                   = 167;
-//  private static final int opc_jsr                    = 168;
-//  private static final int opc_ret                    = 169;
-//  private static final int opc_tableswitch            = 170;
-//  private static final int opc_lookupswitch           = 171;
+    //  private static final int opc_dup_x2                 = 91;
+    //  private static final int opc_dup2                   = 92;
+    //  private static final int opc_dup2_x1                = 93;
+    //  private static final int opc_dup2_x2                = 94;
+    //  private static final int opc_swap                   = 95;
+    //  private static final int opc_iadd                   = 96;
+    //  private static final int opc_ladd                   = 97;
+    //  private static final int opc_fadd                   = 98;
+    //  private static final int opc_dadd                   = 99;
+    //  private static final int opc_isub                   = 100;
+    //  private static final int opc_lsub                   = 101;
+    //  private static final int opc_fsub                   = 102;
+    //  private static final int opc_dsub                   = 103;
+    //  private static final int opc_imul                   = 104;
+    //  private static final int opc_lmul                   = 105;
+    //  private static final int opc_fmul                   = 106;
+    //  private static final int opc_dmul                   = 107;
+    //  private static final int opc_idiv                   = 108;
+    //  private static final int opc_ldiv                   = 109;
+    //  private static final int opc_fdiv                   = 110;
+    //  private static final int opc_ddiv                   = 111;
+    //  private static final int opc_irem                   = 112;
+    //  private static final int opc_lrem                   = 113;
+    //  private static final int opc_frem                   = 114;
+    //  private static final int opc_drem                   = 115;
+    //  private static final int opc_ineg                   = 116;
+    //  private static final int opc_lneg                   = 117;
+    //  private static final int opc_fneg                   = 118;
+    //  private static final int opc_dneg                   = 119;
+    //  private static final int opc_ishl                   = 120;
+    //  private static final int opc_lshl                   = 121;
+    //  private static final int opc_ishr                   = 122;
+    //  private static final int opc_lshr                   = 123;
+    //  private static final int opc_iushr                  = 124;
+    //  private static final int opc_lushr                  = 125;
+    //  private static final int opc_iand                   = 126;
+    //  private static final int opc_land                   = 127;
+    //  private static final int opc_ior                    = 128;
+    //  private static final int opc_lor                    = 129;
+    //  private static final int opc_ixor                   = 130;
+    //  private static final int opc_lxor                   = 131;
+    //  private static final int opc_iinc                   = 132;
+    //  private static final int opc_i2l                    = 133;
+    //  private static final int opc_i2f                    = 134;
+    //  private static final int opc_i2d                    = 135;
+    //  private static final int opc_l2i                    = 136;
+    //  private static final int opc_l2f                    = 137;
+    //  private static final int opc_l2d                    = 138;
+    //  private static final int opc_f2i                    = 139;
+    //  private static final int opc_f2l                    = 140;
+    //  private static final int opc_f2d                    = 141;
+    //  private static final int opc_d2i                    = 142;
+    //  private static final int opc_d2l                    = 143;
+    //  private static final int opc_d2f                    = 144;
+    //  private static final int opc_i2b                    = 145;
+    //  private static final int opc_i2c                    = 146;
+    //  private static final int opc_i2s                    = 147;
+    //  private static final int opc_lcmp                   = 148;
+    //  private static final int opc_fcmpl                  = 149;
+    //  private static final int opc_fcmpg                  = 150;
+    //  private static final int opc_dcmpl                  = 151;
+    //  private static final int opc_dcmpg                  = 152;
+    //  private static final int opc_ifeq                   = 153;
+    //  private static final int opc_ifne                   = 154;
+    //  private static final int opc_iflt                   = 155;
+    //  private static final int opc_ifge                   = 156;
+    //  private static final int opc_ifgt                   = 157;
+    //  private static final int opc_ifle                   = 158;
+    //  private static final int opc_if_icmpeq              = 159;
+    //  private static final int opc_if_icmpne              = 160;
+    //  private static final int opc_if_icmplt              = 161;
+    //  private static final int opc_if_icmpge              = 162;
+    //  private static final int opc_if_icmpgt              = 163;
+    //  private static final int opc_if_icmple              = 164;
+    //  private static final int opc_if_acmpeq              = 165;
+    //  private static final int opc_if_acmpne              = 166;
+    //  private static final int opc_goto                   = 167;
+    //  private static final int opc_jsr                    = 168;
+    //  private static final int opc_ret                    = 169;
+    //  private static final int opc_tableswitch            = 170;
+    //  private static final int opc_lookupswitch           = 171;
     private static final int opc_ireturn = 172;
     private static final int opc_lreturn = 173;
     private static final int opc_freturn = 174;
@@ -293,14 +293,14 @@ class ProxyGenerator {
     private static final int opc_athrow = 191;
     private static final int opc_checkcast = 192;
     //  private static final int opc_instanceof             = 193;
-//  private static final int opc_monitorenter           = 194;
-//  private static final int opc_monitorexit            = 195;
+    //  private static final int opc_monitorenter           = 194;
+    //  private static final int opc_monitorexit            = 195;
     private static final int opc_wide = 196;
-//  private static final int opc_multianewarray         = 197;
-//  private static final int opc_ifnull                 = 198;
-//  private static final int opc_ifnonnull              = 199;
-//  private static final int opc_goto_w                 = 200;
-//  private static final int opc_jsr_w                  = 201;
+    //  private static final int opc_multianewarray         = 197;
+    //  private static final int opc_ifnull                 = 198;
+    //  private static final int opc_ifnonnull              = 199;
+    //  private static final int opc_goto_w                 = 200;
+    //  private static final int opc_jsr_w                  = 201;
 
     // end of constants copied from sun.tools.java.RuntimeConstants
 
@@ -380,7 +380,6 @@ class ProxyGenerator {
     private static Method hashCodeMethod;
     private static Method equalsMethod;
     private static Method toStringMethod;
-
     static {
         try {
             hashCodeMethod = Object.class.getMethod("hashCode");
@@ -521,9 +520,7 @@ class ProxyGenerator {
         for (List<ProxyMethod> sigmethods : proxyMethods.values()) {
             checkReturnTypes(sigmethods);
         }
-
-
-        //
+        // 合并到一起
         /* ============================================================
          * Step 2: Assemble FieldInfo and MethodInfo structs for all of
          * fields and methods in the class we are generating.
@@ -556,8 +553,6 @@ class ProxyGenerator {
             throw new IllegalArgumentException("field limit exceeded");
         }
 
-
-
         // 常量池
         /* ============================================================
          * Step 3: Write the final class file.
@@ -576,9 +571,6 @@ class ProxyGenerator {
          * we are about to write the final constant pool table.
          */
         cp.setReadOnly();
-
-
-
 
 
         // 字节数组输出流
@@ -603,7 +595,7 @@ class ProxyGenerator {
 
             // 4、常量池计数器+常量池数据区
             // 把输入流传进去了
-            cp.write(dataOutputStream);             // (write constant pool)
+            cp.write(dataOutputStream); // (write constant pool)
 
             // 6、访问标志
             // u2 access_flags;
@@ -613,7 +605,7 @@ class ProxyGenerator {
             // u2 this_class;
             dataOutputStream.writeShort(cp.getClass(dotToSlash(className)));
 
-            // 8、父类索引
+            // 8、父类索引 java/lang/reflect/Proxy
             // u2 super_class;
             dataOutputStream.writeShort(cp.getClass(superclassName));
 
@@ -654,7 +646,7 @@ class ProxyGenerator {
         } catch (IOException e) {
             throw new InternalError("unexpected I/O Exception", e);
         }
-
+        // 返回byte数组
         return byteArrayOutputStream.toByteArray();
     }
 
@@ -804,7 +796,6 @@ class ProxyGenerator {
             this.name = name;
             this.descriptor = descriptor;
             this.accessFlags = accessFlags;
-
             /*
              * Make sure that constant pool indexes are reserved for the
              * following items before starting to write the final class file.
@@ -840,8 +831,7 @@ class ProxyGenerator {
         public short handlerPc;
         public short catchType;
 
-        public ExceptionTableEntry(short startPc, short endPc,
-                                   short handlerPc, short catchType) {
+        public ExceptionTableEntry(short startPc, short endPc, short handlerPc, short catchType) {
             this.startPc = startPc;
             this.endPc = endPc;
             this.handlerPc = handlerPc;
@@ -863,8 +853,7 @@ class ProxyGenerator {
         public short maxStack;
         public short maxLocals;
         public ByteArrayOutputStream code = new ByteArrayOutputStream();
-        public List<ExceptionTableEntry> exceptionTable =
-                new ArrayList<ExceptionTableEntry>();
+        public List<ExceptionTableEntry> exceptionTable = new ArrayList<ExceptionTableEntry>();
         public short[] declaredExceptions;
 
         public MethodInfo(String name, String descriptor, int accessFlags) {
@@ -1788,6 +1777,7 @@ class ProxyGenerator {
          * Get or assign the index for a CONSTANT_Class entry.
          */
         public short getClass(String name) {
+            // 返回name在this.pool是第几次加入的
             short utf8Index = getUtf8(name);
             return getIndirect(new IndirectEntry(CONSTANT_CLASS, utf8Index));
         }
@@ -1866,9 +1856,12 @@ class ProxyGenerator {
         public void write(OutputStream out) throws IOException {
             DataOutputStream dataOut = new DataOutputStream(out);
 
+            // 4、常类词计数器
+            // 这里写入cp的大小，注意size()+1，可以和之前Class结构中的constant_pool_count对应
             // constant_pool_count: number of entries plus one
             dataOut.writeShort(pool.size() + 1);
 
+            // 遍历cp中的对象，写入详细信息，对应Class结构中的cp_info
             for (Entry e : pool) {
                 e.write(dataOut);
             }
@@ -1885,8 +1878,7 @@ class ProxyGenerator {
              * CONSTANT_Long or CONSTANT_Double entries.
              */
             if (pool.size() >= 65535) {
-                throw new IllegalArgumentException(
-                        "constant pool size limit exceeded");
+                throw new IllegalArgumentException("constant pool size limit exceeded");
             }
             return (short) pool.size();
         }
@@ -1908,10 +1900,11 @@ class ProxyGenerator {
                 return index.shortValue();
             } else {
                 if (readOnly) {
-                    throw new InternalError(
-                            "late constant pool addition: " + key);
+                    throw new InternalError("late constant pool addition: " + key);
                 }
+                // 累加
                 short i = addEntry(new ValueEntry(key));
+                // key是第几个加入的
                 map.put(key, (int) i);
                 return i;
             }
@@ -1955,11 +1948,10 @@ class ProxyGenerator {
          */
         private static class ValueEntry extends Entry {
             private Object value;
-
             public ValueEntry(Object value) {
                 this.value = value;
             }
-
+            //
             public void write(DataOutputStream out) throws IOException {
                 if (value instanceof String) {
                     out.writeByte(CONSTANT_UTF8);
