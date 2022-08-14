@@ -1,0 +1,60 @@
+javap -v Test.class
+
+Classfile /Users/tianjiyuan/Documents/jvm/Test.class
+  Last modified 2020-7-3; size 292 bytes
+  MD5 checksum 1afecf9ea44088238bc8aa9804b28208
+  Compiled from "Test.java"
+public class Test implements TestInt
+  minor version: 0
+  major version: 52
+  flags: ACC_PUBLIC, ACC_SUPER
+Constant pool:
+   #1 = Methodref          #4.#16         // java/lang/Object."<init>":()V
+   #2 = Fieldref           #3.#17         // Test.field:I
+   #3 = Class              #18            // Test
+   #4 = Class              #19            // java/lang/Object
+   #5 = Class              #20            // TestInt
+   #6 = Utf8               field
+   #7 = Utf8               I
+   #8 = Utf8               <init>
+   #9 = Utf8               ()V
+  #10 = Utf8               Code
+  #11 = Utf8               LineNumberTable
+  #12 = Utf8               add
+  #13 = Utf8               (II)I
+  #14 = Utf8               SourceFile
+  #15 = Utf8               Test.java
+  #16 = NameAndType        #8:#9          // "<init>":()V
+  #17 = NameAndType        #6:#7          // field:I
+  #18 = Utf8               Test
+  #19 = Utf8               java/lang/Object
+  #20 = Utf8               TestInt
+{
+  public Test();
+    descriptor: ()V
+    flags: ACC_PUBLIC
+    Code:
+      stack=2, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: aload_0
+         5: iconst_1
+         6: putfield      #2                  // Field field:I
+         9: return
+      LineNumberTable:
+        line 1: 0
+        line 2: 4
+
+  public int add(int, int);
+    descriptor: (II)I
+    flags: ACC_PUBLIC
+    Code:
+      stack=2, locals=3, args_size=3
+         0: iload_1
+         1: iload_2
+         2: iadd
+         3: ireturn
+      LineNumberTable:
+        line 5: 0
+}
+SourceFile: "Test.java"
