@@ -1137,7 +1137,7 @@ class ProxyGenerator {
          */
         private ProxyMethod(String methodName, Class<?>[] parameterTypes, Class<?> returnType, Class<?>[] exceptionTypes, Class<?> fromClass) {
             this.methodName = methodName; // 方法名
-            this.parameterTypes = parameterTypes;
+            this.parameterTypes = parameterTypes; //
             this.returnType = returnType;
             this.exceptionTypes = exceptionTypes;
             this.fromClass = fromClass;
@@ -1149,6 +1149,64 @@ class ProxyGenerator {
          *
          * Return a MethodInfo object for this method, including generating the code and exception table entry.
          */
+        // 反编译代理类
+        // public final java.lang.String sayHi(java.lang.String, java.lang.Integer) throws java.io.FileNotFoundException;
+        //   descriptor: (Ljava/lang/String;Ljava/lang/Integer;)Ljava/lang/String;
+        //   flags: (0x0011) ACC_PUBLIC, ACC_FINAL
+        //   Code:
+        //     stack=7, locals=4, args_size=3
+        //        0: aload_0
+        //        1: getfield      #2                  // Field java/lang/reflect/Proxy.h:Ljava/lang/reflect/InvocationHandler;
+        //        4: aload_0
+        //        5: getstatic     #13                 // Field m3:Ljava/lang/reflect/Method;
+        //        8: iconst_2
+        //        9: anewarray     #4                  // class java/lang/Object
+        //       12: dup
+        //       13: iconst_0
+        //       14: aload_1
+        //       15: aastore
+        //       16: dup
+        //       17: iconst_1
+        //       18: aload_2
+        //       19: aastore
+        //       20: invokeinterface #5,  4            // InterfaceMethod java/lang/reflect/InvocationHandler.invoke:(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;
+        //       25: checkcast     #14                 // class java/lang/String
+        //       28: areturn
+        //       29: astore_3
+        //       30: aload_3
+        //       31: athrow
+        //       32: astore_3
+        //       33: new           #11                 // class java/lang/reflect/UndeclaredThrowableException
+        //       36: dup
+        //       37: aload_3
+        //       38: invokespecial #12                 // Method java/lang/reflect/UndeclaredThrowableException."<init>":(Ljava/lang/Throwable;)V
+        //       41: athrow
+        //     Exception table:
+        //        from    to  target type
+        //            0    28    29   Class java/lang/RuntimeException
+        //            0    28    29   Class java/io/FileNotFoundException
+        //            0    28    29   Class java/lang/Error
+        //            0    28    32   Class java/lang/Throwable
+        //     LineNumberTable:
+        //       line 32: 0
+        //       line 33: 29
+        //       line 34: 30
+        //       line 35: 32
+        //       line 36: 33
+        //     LocalVariableTable:
+        //       Start  Length  Slot  Name   Signature
+        //          30       2     3  var4   Ljava/lang/Throwable;
+        //          33       9     3  var5   Ljava/lang/Throwable;
+        //           0      42     0  this   Lcn/baker/jvm/dynamicproxy/out/MyProxy;
+        //           0      42     1  var1   Ljava/lang/String;
+        //           0      42     2  var2   Ljava/lang/Integer;
+        //     StackMapTable: number_of_entries = 2
+        //       frame_type = 93 /* same_locals_1_stack_item */
+        //         stack = [ class java/lang/Throwable ]
+        //       frame_type = 66 /* same_locals_1_stack_item */
+        //         stack = [ class java/lang/Throwable ]
+        //   Exceptions:
+        //     throws java.io.FileNotFoundException
         private MethodInfo generateMethod() throws IOException {
             // 获取方法的描述，类似于 ()V 描述方法的参数和返回参数，这里()V表示获取0个参数，返回为void的方法
             String desc = getMethodDescriptor(parameterTypes, returnType);
@@ -1170,7 +1228,7 @@ class ProxyGenerator {
             short tryEnd;
 
             DataOutputStream out = new DataOutputStream(minfo.code);
-            // aload_0，加载栈帧本地变量表的第一个参数，因为是实例方法，所以是就是指this
+            // aload_0，加载栈帧本地变量表的第一个参数到操作栈，因为是实例方法，所以是就是指this
             code_aload(0, out);
 
             // getfield，获取this的实例字段
@@ -1434,6 +1492,23 @@ class ProxyGenerator {
     /**
      * Generate the constructor method for the proxy class.
      */
+    // 反编译动态代理类 javap -v MyProxy.class
+    // public cn.baker.jvm.dynamicproxy.out.MyProxy(java.lang.reflect.InvocationHandler);
+    //   descriptor: (Ljava/lang/reflect/InvocationHandler;)V
+    //   flags: (0x0001) ACC_PUBLIC
+    //   Code:
+    //     stack=2, locals=2, args_size=2
+    //        0: aload_0
+    //        1: aload_1
+    //        2: invokespecial #1                  // Method java/lang/reflect/Proxy."<init>":(Ljava/lang/reflect/InvocationHandler;)V
+    //        5: return
+    //     LineNumberTable:
+    //       line 17: 0
+    //       line 18: 5
+    //     LocalVariableTable:
+    //       Start  Length  Slot  Name   Signature
+    //           0       6     0  this   Lcn/baker/jvm/dynamicproxy/out/MyProxy;
+    //           0       6     1  var1   Ljava/lang/reflect/InvocationHandler;
     private MethodInfo generateConstructor() throws IOException {
         // 方法名       ：构造函数，所以方法名为<init>
         // 方法描述     ：方法的描述表示，该方法获取一个java.lang.reflect.InvocationHandler类型的参数，返回值为V（表示void）

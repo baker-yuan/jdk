@@ -1,6 +1,7 @@
 package cn.baker.jvm.dynamicproxy;
 
 
+import java.io.FileNotFoundException;
 import java.lang.reflect.Proxy;
 
 /**
@@ -14,15 +15,15 @@ public class ServiceProxy {
      * jdk.proxy.ProxyGenerator.saveGeneratedFiles
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
 
 
         Hello origin = new Hello();
         IHello IHello = (IHello) getInstance(IHello.class, new ProxyHandler<>(origin));
 
-        IHello.sayHi();
+        IHello.sayHi("a", 2);
         System.out.println(IHello.toString());
-
+        System.out.println();
         // generateProxyClass();
     }
 
