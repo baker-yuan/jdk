@@ -64,6 +64,7 @@ import java.util.stream.StreamSupport;
  * @since   1.0
  */
 public class BitSet implements Cloneable, java.io.Serializable {
+
     /*
      * BitSets are packed into arrays of "words."  Currently a word is
      * a long, which consists of 64 bits, requiring 6 address bits.
@@ -130,14 +131,17 @@ public class BitSet implements Cloneable, java.io.Serializable {
     private void recalculateWordsInUse() {
         // Traverse the bitset until a used word is found
         int i;
-        for (i = wordsInUse-1; i >= 0; i--)
-            if (words[i] != 0)
+        for (i = wordsInUse-1; i >= 0; i--) {
+            if (words[i] != 0) {
                 break;
-
+            }
+        }
         wordsInUse = i+1; // The new logical size
     }
 
     /**
+     * 创建一个BitSet，所有位置都设置为false
+     *
      * Creates a new bit set. All bits are initially {@code false}.
      */
     public BitSet() {
@@ -156,9 +160,9 @@ public class BitSet implements Cloneable, java.io.Serializable {
      */
     public BitSet(int nbits) {
         // nbits can't be negative; size 0 is OK
-        if (nbits < 0)
+        if (nbits < 0) {
             throw new NegativeArraySizeException("nbits < 0: " + nbits);
-
+        }
         initWords(nbits);
         sizeIsSticky = true;
     }
@@ -364,8 +368,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
         if (toIndex < 0)
             throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
         if (fromIndex > toIndex)
-            throw new IndexOutOfBoundsException("fromIndex: " + fromIndex +
-                                                " > toIndex: " + toIndex);
+            throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + " > toIndex: " + toIndex);
     }
 
     /**
