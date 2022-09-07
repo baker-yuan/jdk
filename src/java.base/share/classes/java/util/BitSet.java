@@ -526,16 +526,16 @@ public class BitSet implements Cloneable, java.io.Serializable {
         // 这下是不是明白，就是我看看words[wordIndex]的数组是不是1，如有为1还是1（在啰嗦下，或就是两个只有有一个是1就是1，多读几次就知道）
 
 
-        // String before = this.toBinaryStringV2();
-        // words[wordIndex] |= (1L << bitIndex); // Restores invariants
-        // String after = this.toBinaryStringV2();
+        String before = this.toBinaryStringV2();
+        words[wordIndex] |= (1L << bitIndex); // Restores invariants
+        String after = this.toBinaryStringV2();
 
 
         // 等效代码
-        String a = Long.toBinaryStringV2(1L << bitIndex);
-        String b = Long.toBinaryStringV2(words[wordIndex]);
-        words[wordIndex] = words[wordIndex] | (1L << bitIndex);
-        String c = this.toBinaryStringV2();
+        // String a = Long.toBinaryStringV2(1L << bitIndex);
+        // String b = Long.toBinaryStringV2(words[wordIndex]);
+        // words[wordIndex] = words[wordIndex] | (1L << bitIndex);
+        // String c = this.toBinaryStringV2();
 
         //检测数据
         checkInvariants();
