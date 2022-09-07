@@ -371,6 +371,24 @@ public final class Long extends Number implements Comparable<Long> {
     }
 
     /**
+     * 自定义二进制打印
+     * @param num num
+     * @return 二进制
+     */
+    public static String toBinaryStringV2(long num) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 63; i >= 0; i--) {
+            if (((1L << i) & num) != 0) {
+                sb.append("1");
+            } else {
+                sb.append("0");
+            }
+        }
+        return sb.toString();
+    }
+
+
+    /**
      * Format a long (treated as unsigned) into a String.
      * @param val the value to format
      * @param shift the log2 of the base to format in (4 for hex, 3 for octal, 1 for binary)

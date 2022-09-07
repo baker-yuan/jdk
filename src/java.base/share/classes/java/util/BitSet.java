@@ -515,7 +515,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
         // 3.重置桶位使用长度
         expandTo(wordIndex);
         // 4.将set的索引位通过‘或运算’置为1
-        // 这个我们讲下这个，转化下：words[wordIndex] = words[wordIndex] || (1L << bitIndex);
+        // 这个我们讲下这个，转化下：words[wordIndex] = words[wordIndex] | (1L << bitIndex);
         // 先看下(1L << bitIndex) 说明：左移动数组的bitIndex 位，然后为1，怎么说呢？看下面吧
         // 1L<<1 转化为2进制，10，
         // 1L<<2 转化为2进制，100，
@@ -524,7 +524,17 @@ public class BitSet implements Cloneable, java.io.Serializable {
         // 这个是否明白，哈，然在看看下words[wordIndex] ||(1L << bitIndex)，
         // 啰嗦下，bitset存的就是1或0的2进制数组，0代表为没有存在这个集合，1代表存在这个集合
         // 这下是不是明白，就是我看看words[wordIndex]的数组是不是1，如有为1还是1（在啰嗦下，或就是两个只有有一个是1就是1，多读几次就知道）
+
+
+        // String a = Long.toBinaryString(1L << bitIndex);
+        // String b = Long.toBinaryString(words[wordIndex]);
+        // words[wordIndex] = words[wordIndex] | (1L << bitIndex);
+        // String c = this.toBinaryString();
+
+        String before = this.toBinaryString();
         words[wordIndex] |= (1L << bitIndex); // Restores invariants
+        String after = this.toBinaryString();
+
         //检测数据
         checkInvariants();
     }
@@ -1289,6 +1299,18 @@ public class BitSet implements Cloneable, java.io.Serializable {
         recalculateWordsInUse();
         sizeIsSticky = (words.length > 0 && words[words.length-1] == 0L); // heuristic
         checkInvariants();
+    }
+
+    /**
+     *
+     * @return binaryString
+     */
+    public String toBinaryString() {
+        StringBuilder sb = new StringBuilder();
+        for (long word : words) {
+            sb.append(Long.toBinaryStringV2(word)).append(" ");
+        }
+        return sb.toString();
     }
 
     /**
