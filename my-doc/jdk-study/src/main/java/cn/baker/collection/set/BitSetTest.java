@@ -23,7 +23,8 @@ public class BitSetTest {
         System.out.println(Long.toBinaryString(l2));
 
         BitSet bs = new BitSet();
-        //bs.set(1);
+        bs.set(0);
+        bs.set(1);
         bs.set(6);
 
 
