@@ -63,6 +63,9 @@ import java.util.stream.StreamSupport;
  * @author  Martin Buchholz
  * @since   1.0
  */
+/**
+ * https://blog.csdn.net/qq_41243873/article/details/119787610
+ */
 public class BitSet implements Cloneable, java.io.Serializable {
 
     /*
@@ -70,8 +73,20 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * a long, which consists of 64 bits, requiring 6 address bits.
      * The choice of word size is determined purely by performance concerns.
      */
+    /**
+     * ADDRESS_BITS_PER_WORD: 固定值为6，主要用作位运算的常量
+     *
+     * x >> 6 相当于除以64，由于long类型是64，这个运算是为了定位数组位置
+     * x << 6 相当于乘以64，由于long类型是64，这个运算是为了定位数组位置
+     */
     private static final int ADDRESS_BITS_PER_WORD = 6;
+    /**
+     * BITS_PER_WORD：值为64，作为长度计算值
+     */
     private static final int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
+    /**
+     * BIT_INDEX_MASK：索引掩码
+     */
     private static final int BIT_INDEX_MASK = BITS_PER_WORD - 1;
 
     /* Used to shift left or right for a partial word mask */
@@ -89,21 +104,28 @@ public class BitSet implements Cloneable, java.io.Serializable {
     };
 
     /**
+     * Bitset位图，其中最核心的部分是words数组，也就是桶位，每个桶的存放类型为long类型
+     *
      * The internal field corresponding to the serialField "bits".
      */
     private long[] words;
 
     /**
+     * 记录数组桶位的有效长度
+     *
      * The number of words in the logical size of this BitSet.
      */
     private transient int wordsInUse = 0;
 
     /**
+     * 保护初始化构造方法时自定义的数组长度
+     *
      * Whether the size of "words" is user-specified.  If so, we assume
      * the user knows what he's doing and try harder to preserve it.
      */
     private transient boolean sizeIsSticky = false;
 
+    
     /* use serialVersionUID from JDK 1.0.2 for interoperability */
     private static final long serialVersionUID = 7997698588986878753L;
 
