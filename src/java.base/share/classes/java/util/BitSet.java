@@ -427,6 +427,16 @@ public class BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
+     * 索引翻转
+     * 异或的作用：相同为0，不同为1，因此flip方法实质上是对撞抵消
+     * 场景：计算商品是否发货，含重复id的商品，通过flip令id抵消，表示商品已发出
+     * 执行逻辑：
+     * 1、检验索引范围
+     * 2、计算flip的索引位置在哪个桶上
+     * 3、重置桶位使用长度
+     * 4、将flip的索引位通过 ‘异或’ 进行翻转
+     * 5、重新计算桶位有效长度
+     *
      * Sets the bit at the specified index to the complement of its
      * current value.
      *
@@ -435,14 +445,17 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * @since  1.4
      */
     public void flip(int bitIndex) {
-        if (bitIndex < 0)
+        // 1.检验索引范围
+        if (bitIndex < 0) {
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
+        }
+        // 2.计算flip的索引位置在哪个桶上
         int wordIndex = wordIndex(bitIndex);
+        // 3.重置桶位使用长度
         expandTo(wordIndex);
-
+        // 4.将flip的索引位通过 ‘异或’ 进行翻转
         words[wordIndex] ^= (1L << bitIndex);
-
+        // 5.重新计算桶位有效长度
         recalculateWordsInUse();
         checkInvariants();
     }
@@ -1037,6 +1050,13 @@ public class BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
+     * 与运算
+     * 执行逻辑：
+     * 1、自身相计算，则结果不有变更，终止执行
+     * 2、若当前Bitset的有效桶位多于传入的Bitset的有效桶位数量，则将当前Bitset的多余桶位全部归0，因为1与0作 ‘与运算’ 结果为0，因此多余桶部分计算的结果也为0，免去位运算过程，直接归0，提效
+     * 3、对有效桶进行 ‘与运算’
+     * 4、重新计算桶位有效长度
+     *
      * Performs a logical <b>AND</b> of this target bit set with the
      * argument bit set. This bit set is modified so that each bit in it
      * has the value {@code true} if and only if it both initially
@@ -1046,24 +1066,33 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * @param set a bit set
      */
     public void and(BitSet set) {
+        // 1.自身相计算，则结果不有变更，终止执行
         if (this == set) {
             return;
         }
-
+        // 2.若当前Bitset的有效桶位多于传入的Bitset的有效桶位数量，则将当前Bitset的多余桶位全部归0
         while (wordsInUse > set.wordsInUse) {
             words[--wordsInUse] = 0;
         }
-
+        // 3.对有效桶进行 ‘与运算’
         // Perform logical AND on words in common
         for (int i = 0; i < wordsInUse; i++) {
             words[i] &= set.words[i];
         }
-
+        // 4.重新计算桶位有效长度
         recalculateWordsInUse();
         checkInvariants();
     }
 
     /**
+     * 或运算
+     * 执行逻辑：
+     * 1、自身相计算，则结果不有变更，终止执行
+     * 2、使用两个Bitset公共桶位
+     * 3、当前Bitset桶位长度若小于传入的Bitset的桶位长度，则将当前Bitset桶位长度上升
+     * 4、对每个桶都进行 ‘或运算’
+     * 5、若公共桶位长度小于传入的Bitset的有效桶位长度，则将传入的Bitset的增量桶赋值给当前Bitset对应桶位
+     *
      * Performs a logical <b>OR</b> of this bit set with the bit set
      * argument. This bit set is modified so that a bit in it has the
      * value {@code true} if and only if it either already had the
@@ -1073,22 +1102,23 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * @param set a bit set
      */
     public void or(BitSet set) {
+        // 1.自身相计算，则结果不有变更，终止执行
         if (this == set) {
             return;
         }
-
+        // 2.使用两个Bitset公共桶位长度
         int wordsInCommon = Math.min(wordsInUse, set.wordsInUse);
-
+        // 3.当前Bitset桶位长度若小于传入的Bitset的桶位长度，则将当前Bitset桶位长度上升
         if (wordsInUse < set.wordsInUse) {
             ensureCapacity(set.wordsInUse);
             wordsInUse = set.wordsInUse;
         }
-
+        // 4.对每个桶都进行 ‘或运算’
         // Perform logical OR on words in common
         for (int i = 0; i < wordsInCommon; i++) {
             words[i] |= set.words[i];
         }
-
+        // 5.若公共桶位长度小于传入的Bitset的有效桶位长度，则将传入的Bitset的增量桶赋值给当前Bitset对应桶位
         // Copy any remaining words
         if (wordsInCommon < set.wordsInUse) {
             System.arraycopy(set.words, wordsInCommon, words, wordsInCommon, wordsInUse - wordsInCommon);
@@ -1099,6 +1129,14 @@ public class BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
+     * 异或运算
+     * 执行逻辑：
+     * 1、使用两个Bitset公共桶位
+     * 2、当前Bitset桶位长度若小于传入的Bitset的桶位长度，则将当前Bitset桶位长度上升
+     * 3、对每个桶都进行 ‘异或运算’
+     * 4、若公共桶位长度小于传入的Bitset的有效桶位长度，则将传入的Bitset的增量桶赋值给当前Bitset对应桶位
+     * 5、重新计算桶位有效长度
+     *
      * Performs a logical <b>XOR</b> of this bit set with the bit set
      * argument. This bit set is modified so that a bit in it has the
      * value {@code true} if and only if one of the following
@@ -1113,28 +1151,35 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * @param  set a bit set
      */
     public void xor(BitSet set) {
+        // 1.使用两个Bitset公共桶位
         int wordsInCommon = Math.min(wordsInUse, set.wordsInUse);
-
+        // 2.当前Bitset桶位长度若小于传入的Bitset的桶位长度，则将当前Bitset桶位长度上升
         if (wordsInUse < set.wordsInUse) {
             ensureCapacity(set.wordsInUse);
             wordsInUse = set.wordsInUse;
         }
-
+        // 3.对每个桶都进行 ‘异或运算’
         // Perform logical XOR on words in common
         for (int i = 0; i < wordsInCommon; i++) {
             words[i] ^= set.words[i];
         }
-
+        // 4.若公共桶位长度小于传入的Bitset的有效桶位长度，则将传入的Bitset的增量桶赋值给当前Bitset对应桶位
         // Copy any remaining words
         if (wordsInCommon < set.wordsInUse) {
             System.arraycopy(set.words, wordsInCommon, words, wordsInCommon, set.wordsInUse - wordsInCommon);
         }
-
+        // 5.重新计算桶位有效长度
         recalculateWordsInUse();
         checkInvariants();
     }
 
     /**
+     * 非运算
+     * 执行逻辑：
+     * 1、循环的最大次数取两个Bitset的公共有效桶位
+     * 2、对有效桶进行 当前桶 ‘与运算’ 传入的桶（传入的桶先进行 ‘非运算’ 取反）
+     *
+     *
      * Clears all of the bits in this {@code BitSet} whose corresponding
      * bit is set in the specified {@code BitSet}.
      *
@@ -1143,6 +1188,8 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * @since  1.2
      */
     public void andNot(BitSet set) {
+        // 1.循环的最大次数取两个Bitset的公共有效桶位
+        // 2.对有效桶进行 当前桶 ‘与运算’ 传入的桶（传入的桶先进行 ‘非运算’ 取反）
         // Perform logical (a & !b) on words in common
         for (int i = Math.min(wordsInUse, set.wordsInUse) - 1; i >= 0; i--) {
             words[i] &= ~set.words[i];
