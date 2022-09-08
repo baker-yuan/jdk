@@ -65,6 +65,27 @@ import java.util.stream.StreamSupport;
  */
 /**
  * https://blog.csdn.net/qq_41243873/article/details/119787610
+ * https://blog.csdn.net/z69183787/article/details/70208656
+ */
+
+/**
+ * BitSet简介
+ * 1、
+ * 2、
+ * 3、默认情况下，BitSet中所有位的初始值都是0(false)。
+ * 4、除非另行说明，否则将 null 参数传递给BitSet中的任何方法都将导致NullPointerException。
+ * 5、在没有外部同步的情况下，多个线程操作一个BitSet是不安全的
+ *
+ * 基本原理
+ * BitSet是位操作的对象，值只有0或1即false和true，内部维护了一个long数组，初始只有一个long，所以BitSet最小的size是64，当随着存储的元素越来越多，BitSet内部会动态扩充，最终内部是由N个long来存储，这些针对操作都是透明的。
+ * 用1位来表示一个数据是否出现过，0为没有出现过，1表示出现过。使用用的时候既可根据某一个是否为0表示，此数是否出现过。
+ * 一个1G的空间，有 8*1024*1024*1024=8.58*10^9bit，也就是可以表示85亿个不同的数
+ *
+ * 使用场景
+ *
+ *
+ *
+ *
  */
 public class BitSet implements Cloneable, java.io.Serializable {
 
