@@ -36,6 +36,7 @@ import java.util.Objects;
  *
  * @since 1.8
  */
+// https://www.cnblogs.com/satire/p/14323994.html
 @FunctionalInterface
 public interface Predicate<T> {
 
@@ -45,6 +46,10 @@ public interface Predicate<T> {
      * @param t the input argument
      * @return {@code true} if the input argument matches the predicate,
      * otherwise {@code false}
+     */
+    /**
+     * 具体过滤操作 需要被子类实现
+     * 用来处理参数T是否满足要求 可以理解为 条件A
      */
     boolean test(T t);
 
@@ -64,6 +69,10 @@ public interface Predicate<T> {
      * AND of this predicate and the {@code other} predicate
      * @throws NullPointerException if other is null
      */
+    /**
+     * 调用当前Predicate的test方法之后再去调用other的test方法 相当于进行两次判断
+     * 可理解为 条件A && 条件B
+     */
     default Predicate<T> and(Predicate<? super T> other) {
         Objects.requireNonNull(other);
         return (t) -> test(t) && other.test(t);
@@ -75,6 +84,10 @@ public interface Predicate<T> {
      *
      * @return a predicate that represents the logical negation of this
      * predicate
+     */
+    /**
+     * 对当前判断进行"!"操作，即取非操作
+     * 可理解为 ! 条件A
      */
     default Predicate<T> negate() {
         return (t) -> !test(t);
@@ -96,6 +109,9 @@ public interface Predicate<T> {
      * OR of this predicate and the {@code other} predicate
      * @throws NullPointerException if other is null
      */
+    /**
+     * 对当前判断进行"||"操作,即取或操作,可以理解为 条件A ||条件B
+     */
     default Predicate<T> or(Predicate<? super T> other) {
         Objects.requireNonNull(other);
         return (t) -> test(t) || other.test(t);
@@ -111,10 +127,11 @@ public interface Predicate<T> {
      * @return a predicate that tests if two arguments are equal according
      * to {@link Objects#equals(Object, Object)}
      */
+    /**
+     * 对当前操作进行"="操作,即取等操作,可以理解为 A == B
+     */
     static <T> Predicate<T> isEqual(Object targetRef) {
-        return (null == targetRef)
-                ? Objects::isNull
-                : object -> targetRef.equals(object);
+        return (null == targetRef) ? Objects::isNull : object -> targetRef.equals(object);
     }
 
     /**

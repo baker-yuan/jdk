@@ -164,6 +164,7 @@ import java.util.function.UnaryOperator;
  * @see DoubleStream
  * @see <a href="package-summary.html">java.util.stream</a>
  */
+// https://blog.csdn.net/weixin_30423977/article/details/95420484
 public interface Stream<T> extends BaseStream<T, Stream<T>> {
 
     /**
