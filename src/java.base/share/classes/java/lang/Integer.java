@@ -1610,20 +1610,34 @@ public final class Integer extends Number implements Comparable<Integer> {
      */
     /**
      * 给定一个int类型数据，返回这个数据的二进制串中从最左边算起连续的“0”的总数量。因为int类型的数据长度为32所以高位不足的地方会以“0”填充。
+     * https://www.jianshu.com/p/4ec7a57bef03
+     *
      * @param i i
      * @return  从最左边算起连续的“0”的总数量
      */
-    // https://www.jianshu.com/p/4ec7a57bef03
     @HotSpotIntrinsicCandidate
     public static int numberOfLeadingZeros(int i) {
         // HD, Count leading 0's
-        if (i <= 0)
+        if (i <= 0) {
             return i == 0 ? 32 : 0;
+        }
         int n = 31;
-        if (i >= 1 << 16) { n -= 16; i >>>= 16; }
-        if (i >= 1 <<  8) { n -=  8; i >>>=  8; }
-        if (i >= 1 <<  4) { n -=  4; i >>>=  4; }
-        if (i >= 1 <<  2) { n -=  2; i >>>=  2; }
+        if (i >= 1 << 16) {
+            n -= 16;
+            i >>>= 16;
+        }
+        if (i >= 1 <<  8) {
+            n -=  8;
+            i >>>=  8;
+        }
+        if (i >= 1 <<  4) {
+            n -=  4;
+            i >>>=  4;
+        }
+        if (i >= 1 <<  2) {
+            n -=  2;
+            i >>>=  2;
+        }
         return n - (i >>> 1);
     }
 

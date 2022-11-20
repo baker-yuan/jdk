@@ -293,6 +293,9 @@ public abstract class SelectionKey {
      * an error pending, then it will add {@code OP_READ} to the key's
      * ready-operation set.  </p>
      */
+    /**
+     * 读就绪事件，表示通道中已经有了可读的数据，可以执行读操作了（通道目前有数据，可以进行读操作了）
+     */
     public static final int OP_READ = 1 << 0;
 
     /**
@@ -305,7 +308,17 @@ public abstract class SelectionKey {
      * remotely shut down for further writing, or has an error pending, then it
      * will add {@code OP_WRITE} to the key's ready set.  </p>
      */
+    /**
+     * 写就绪事件，表示已经可以向通道写数据了（通道目前可以用于写操作）
+     */
     public static final int OP_WRITE = 1 << 2;
+    /**
+     * 注意，SelectionKey.OP_READ ，SelectionKey.OP_WRITE
+     * 1.当向通道中注册SelectionKey.OP_READ事件后，如果客户端有向缓存中write数据，下次轮询时，则会 isReadable()=true；
+     * 2.当向通道中注册SelectionKey.OP_WRITE事件后，这时你会发现当前轮询线程中isWritable()一直为ture，如果不设置为其他事件
+     */
+
+
 
     /**
      * Operation-set bit for socket-connect operations.
@@ -316,6 +329,9 @@ public abstract class SelectionKey {
      * detects that the corresponding socket channel is ready to complete its
      * connection sequence, or has an error pending, then it will add
      * {@code OP_CONNECT} to the key's ready set.  </p>
+     */
+    /**
+     * 连接就绪事件，表示客户与服务器的连接已经建立成功
      */
     public static final int OP_CONNECT = 1 << 3;
 
@@ -328,6 +344,9 @@ public abstract class SelectionKey {
      * detects that the corresponding server-socket channel is ready to accept
      * another connection, or has an error pending, then it will add
      * {@code OP_ACCEPT} to the key's ready set.  </p>
+     */
+    /**
+     * 接收连接继续事件，表示服务器监听到了客户连接，服务器可以接收这个连接了
      */
     public static final int OP_ACCEPT = 1 << 4;
 

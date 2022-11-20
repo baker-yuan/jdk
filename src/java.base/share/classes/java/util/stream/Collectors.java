@@ -581,8 +581,7 @@ public final class Collectors {
      * @return a collector which performs the action of the downstream collector,
      * followed by an additional finishing step
      */
-    public static<T,A,R,RR> Collector<T,A,RR> collectingAndThen(Collector<T,A,R> downstream,
-                                                                Function<R,RR> finisher) {
+    public static<T,A,R,RR> Collector<T,A,RR> collectingAndThen(Collector<T,A,R> downstream, Function<R,RR> finisher) {
         Set<Collector.Characteristics> characteristics = downstream.characteristics();
         if (characteristics.contains(Collector.Characteristics.IDENTITY_FINISH)) {
             if (characteristics.size() == 1)

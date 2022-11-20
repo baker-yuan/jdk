@@ -122,8 +122,7 @@ import jdk.internal.vm.annotation.Stable;
  * @jls     15.18.1 String Concatenation Operator +
  */
 
-public final class String
-    implements java.io.Serializable, Comparable<String>, CharSequence {
+public final class String implements java.io.Serializable, Comparable<String>, CharSequence {
 
     /**
      * The value is used for character storage.
@@ -1659,10 +1658,19 @@ public final class String
      * @return  the index of the first occurrence of the specified substring,
      *          or {@code -1} if there is no such occurrence.
      */
+    /**
+     * 在 Java 9 之前，字符串是用 char 数组来存储的，主要为了支持非英文字符。
+     * 然而，大多数 Java 程序中的字符串都是由 Latin1 字符组成的。
+     * 也就是说每个字符仅需占据一个字节，而使用 char 数组的存储方式将极大地浪费内存空间。
+     * Java 9 引入了 Compact Strings[1]的概念，当字符串仅包含 Latin1 字符时，使用一个字节代表一个字符的编码格式，使得内存使用效率大大提高。
+     *
+     * https://time.geekbang.org/column/article/18046
+     * @param str /
+     * @return /
+     */
     public int indexOf(String str) {
         if (coder() == str.coder()) {
-            return isLatin1() ? StringLatin1.indexOf(value, str.value)
-                              : StringUTF16.indexOf(value, str.value);
+            return isLatin1() ? StringLatin1.indexOf(value, str.value) : StringUTF16.indexOf(value, str.value);
         }
         if (coder() == LATIN1) {  // str.coder == UTF16
             return -1;

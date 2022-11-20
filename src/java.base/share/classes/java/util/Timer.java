@@ -85,7 +85,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @see     Object#wait(long)
  * @since   1.3
  */
-
+// 线程循环 + 优先队列
 public class Timer {
     /**
      * The timer task queue.  This data structure is shared with the timer
@@ -188,13 +188,22 @@ public class Timer {
      *         cancelled, timer was cancelled, or timer thread terminated.
      * @throws NullPointerException if {@code task} is null
      */
+    /**
+     * 一次性任务的API
+     *
+     * @param task 任务
+     * @param delay 时间（毫秒）
+     */
     public void schedule(TimerTask task, long delay) {
-        if (delay < 0)
-            throw new IllegalArgumentException("Negative delay.");
+        if (delay < 0) {
+            throw new IllegalArgumentException("Negative delay."); 
+        }
         sched(task, System.currentTimeMillis()+delay, 0);
     }
 
     /**
+     * 指定时间点运行
+     *
      * Schedules the specified task for execution at the specified time.  If
      * the time is in the past, the task is scheduled for immediate execution.
      *
@@ -208,6 +217,8 @@ public class Timer {
     public void schedule(TimerTask task, Date time) {
         sched(task, time.getTime(), 0);
     }
+
+
 
     /**
      * Schedules the specified task for repeated <i>fixed-delay execution</i>,
@@ -240,6 +251,13 @@ public class Timer {
      * @throws IllegalStateException if task was already scheduled or
      *         cancelled, timer was cancelled, or timer thread terminated.
      * @throws NullPointerException if {@code task} is null
+     */
+    /**
+     * 周期任务的APi
+     *
+     * @param task /
+     * @param delay /
+     * @param period /
      */
     public void schedule(TimerTask task, long delay, long period) {
         if (delay < 0)
@@ -385,30 +403,34 @@ public class Timer {
      * @throws NullPointerException if {@code task} is null
      */
     private void sched(TimerTask task, long time, long period) {
-        if (time < 0)
+        if (time < 0) {
             throw new IllegalArgumentException("Illegal execution time.");
+        }
 
         // Constrain value of period sufficiently to prevent numeric
         // overflow while still being effectively infinitely large.
-        if (Math.abs(period) > (Long.MAX_VALUE >> 1))
+        if (Math.abs(period) > (Long.MAX_VALUE >> 1)) {
             period >>= 1;
+        }
 
         synchronized(queue) {
-            if (!thread.newTasksMayBeScheduled)
+            if (!thread.newTasksMayBeScheduled) {
                 throw new IllegalStateException("Timer already cancelled.");
+            }
 
             synchronized(task.lock) {
-                if (task.state != TimerTask.VIRGIN)
-                    throw new IllegalStateException(
-                        "Task already scheduled or cancelled");
+                if (task.state != TimerTask.VIRGIN) {
+                    throw new IllegalStateException("Task already scheduled or cancelled");
+                }
                 task.nextExecutionTime = time;
                 task.period = period;
                 task.state = TimerTask.SCHEDULED;
             }
 
             queue.add(task);
-            if (queue.getMin() == task)
+            if (queue.getMin() == task) {
                 queue.notify();
+            }
         }
     }
 
@@ -715,7 +737,8 @@ class TaskQueue {
      * assuming nothing about the order of the elements prior to the call.
      */
     void heapify() {
-        for (int i = size/2; i >= 1; i--)
+        for (int i = size/2; i >= 1; i--) {
             fixDown(i);
+        }
     }
 }

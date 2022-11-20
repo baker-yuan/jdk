@@ -103,8 +103,14 @@ public interface ScheduledExecutorService extends ExecutorService {
      *         scheduled for execution
      * @throws NullPointerException if command or unit is null
      */
-    public ScheduledFuture<?> schedule(Runnable command,
-                                       long delay, TimeUnit unit);
+    /**
+     * 
+     * @param command 线程实现
+     * @param delay 延迟时间
+     * @param unit 单位
+     * @return
+     */
+    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit);
 
     /**
      * Submits a value-returning one-shot task that becomes enabled
