@@ -74,13 +74,66 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Doug Lea
  * @param <E> the type of elements held in this queue
  */
-public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
-    implements BlockingQueue<E> {
 
-    private final transient ReentrantLock lock = new ReentrantLock();
+/**
+ * https://zhuanlan.zhihu.com/p/443335543
+ * https://blog.csdn.net/piaoranyuji/article/details/124042408
+ * https://blog.csdn.net/c15158032319/article/details/118636233
+ *
+ * 一、DelayQueue是什么
+ * DelayQueue是一个无界的BlockingQueue，用于放置实现了Delayed接口的对象，其中的对象只能在其到期时才能从队列中取走。
+ * 这种队列是有序的，即队头对象的延迟到期时间最长。注意：不能将null元素放置到这种队列中。
+ *
+ * 二、方法
+ * 2.1、插入
+ * add          抛异常
+ * offer        返回值
+ * put          一直阻塞
+ * offer(time)  超时退出
+ *
+ * 2.2、移除
+ * remove      抛异常
+ * poll        返回值
+ * take        一直阻塞
+ * poll(time)  超时退出
+ *
+ * 2.3、检测
+ * element      抛异常
+ * peek         返回值
+ *
+ * 三、DelayQueue基本原理
+ * DelayQueue是一个没有边界BlockingQueue实现，加入其中的元素必需实现Delayed接口。
+ * 当生产者线程调用put之类的方法加入元素时，会触发Delayed接口中的compareTo方法进行排序，
+ * 也就是说队列中元素的顺序是按到期时间排序的，而非它们进入队列的顺序。
+ * 排在队列头部的元素是最早到期的，越往后到期时间越晚。
+ *
+ * 消费者线程查看队列头部的元素，注意是查看不是取出。然后调用元素的getDelay方法，
+ * 如果此方法返回的值小０或者等于０，则消费者线程会从队列中取出此元素，并进行处理。如果getDelay方法返回的值大于0，
+ * 则消费者线程wait返回的时间值后，再从队列头部取出元素，此时元素应该已经到期。
+ *
+ * DelayQueue是Leader-Followr模式的变种，消费者线程处于等待状态时，
+ * 总是等待最先到期的元素，而不是长时间的等待。消费者线程尽量把时间花在处理任务上，最小化空等的时间，以提高线程的利用效率。
+ *
+ *
+ *
+ */
+
+/**
+ * https://zhuanlan.zhihu.com/p/358776619
+ * https://www.cnblogs.com/duzouzhe/archive/2009/09/28/1575813.html
+ *
+ *
+ */
+public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements BlockingQueue<E> {
+
+    /**
+     * 优先队列 底层使用堆实现
+     */
     private final PriorityQueue<E> q = new PriorityQueue<E>();
 
     /**
+     * 等待头部元素到期的线程，但是这个线程不干活（leader），单纯是盯着要到期的元素，到期了唤起其他线程干活
+     *
      * Thread designated to wait for the element at the head of
      * the queue.  This variant of the Leader-Follower pattern
      * (http://www.cs.wustl.edu/~schmidt/POSA/POSA2/) serves to
@@ -98,12 +151,34 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
      */
     private Thread leader;
 
+
+
     /**
+     * 锁
+     *
+     * offer
+     * poll
+     */
+    private final transient ReentrantLock lock = new ReentrantLock();
+
+    /**
+     * https://blog.csdn.net/qq_40794973/article/details/104111726#t11
+     *
+     * 作用
+     * 当线程1需要等待某个条件的时候，它就去执行condition.await()方法，一旦执行了await()方法，线程就会进入阻塞状态。
+     * 然后通常会有另外—个线程，假设是线程2，去执行对应的条件，直到这个条件达成的时候，线程2就会去执行condition.signal()方法，
+     * 这时JVM就会从被阻塞的线程里找，找到那些等待该condition的线程，当线程1收到可执行信号的时候，它的线程状态就会变成Runnable可执行状态。
+     *
      * Condition signalled when a newer element becomes available
      * at the head of the queue or a new thread may need to
      * become leader.
      */
     private final Condition available = lock.newCondition();
+
+
+    //---------------------------------------------------------------------
+    // 构造函数
+    //---------------------------------------------------------------------
 
     /**
      * Creates a new {@code DelayQueue} that is initially empty.
@@ -121,6 +196,12 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
     public DelayQueue(Collection<? extends E> c) {
         this.addAll(c);
     }
+
+
+
+    //---------------------------------------------------------------------
+    // 添加元素
+    //---------------------------------------------------------------------
 
     /**
      * Inserts the specified element into this delay queue.
@@ -145,8 +226,11 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
         lock.lock();
         try {
             q.offer(e);
+            // 添加的元素是最先到期的
             if (q.peek() == e) {
+                //
                 leader = null;
+                //
                 available.signal();
             }
             return true;
@@ -180,7 +264,19 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
         return offer(e);
     }
 
+
+
+
+    //---------------------------------------------------------------------
+    // 取出元素
+    // remove      抛异常
+    // poll        返回值
+    // take        一直阻塞
+    // poll(time)  超时退出
+    //---------------------------------------------------------------------
     /**
+     * 返回值
+     *
      * Retrieves and removes the head of this queue, or returns {@code null}
      * if this queue has no elements with an expired delay.
      *
@@ -191,7 +287,9 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
+            // 获取最先到期的那个元素
             E first = q.peek();
+            // 如果这个元素以及到时间了，就返回这个元素
             return (first == null || first.getDelay(NANOSECONDS) > 0)
                 ? null
                 : q.poll();
@@ -201,6 +299,8 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
     }
 
     /**
+     * 一直阻塞
+     *
      * Retrieves and removes the head of this queue, waiting if necessary
      * until an element with an expired delay is available on this queue.
      *
@@ -210,38 +310,62 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
     public E take() throws InterruptedException {
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
+
         try {
+
             for (;;) {
                 E first = q.peek();
-                if (first == null)
+                if (first == null) {
+                    // 没有元素，直接睡大觉，到时候有人添加元素会唤起我的
                     available.await();
+                }
                 else {
                     long delay = first.getDelay(NANOSECONDS);
-                    if (delay <= 0L)
+                    if (delay <= 0L) {
+                        // 消息以及过期，可以拿出来了
                         return q.poll();
+                    }
+
+
                     first = null; // don't retain ref while waiting
-                    if (leader != null)
+                    if (leader != null) {
+                        // 以及有人盯着队列的元素，我先休息让他盯着队列，到时候队列首位元素到期后，他们会通知我的
                         available.await();
+                    }
+                    // 没有leader，我得顶上去，盯着队列看谁要过期了，到时候到期了，直接唤起其他线程干活
                     else {
                         Thread thisThread = Thread.currentThread();
+                        // 我升级为leader
+                        // 皇帝轮流做，今年到我家
                         leader = thisThread;
                         try {
+                            // 休眠
                             available.awaitNanos(delay);
                         } finally {
-                            if (leader == thisThread)
+                            // 一觉醒来，队列头的那个元素到期了，我去要叫其他人起来干活了，并且我的任务也完成了，我需要休息
+                            if (leader == thisThread) {
+                                // 我现在要排队等着干活了，我不在是leader
                                 leader = null;
+                            }
                         }
                     }
                 }
             }
+
         } finally {
-            if (leader == null && q.peek() != null)
+            //
+            if (leader == null && q.peek() != null) {
+                // 唤醒其他人起来干活了
                 available.signal();
+            }
+            //
             lock.unlock();
         }
     }
 
     /**
+     * 超时退出
+     *
      * Retrieves and removes the head of this queue, waiting if necessary
      * until an element with an expired delay is available on this queue,
      * or the specified wait time expires.
@@ -259,19 +383,24 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
             for (;;) {
                 E first = q.peek();
                 if (first == null) {
-                    if (nanos <= 0L)
+                    if (nanos <= 0L) {
                         return null;
-                    else
+                    }
+                    else {
                         nanos = available.awaitNanos(nanos);
+                    }
                 } else {
                     long delay = first.getDelay(NANOSECONDS);
-                    if (delay <= 0L)
+                    if (delay <= 0L) {
                         return q.poll();
-                    if (nanos <= 0L)
+                    }
+                    if (nanos <= 0L) {
                         return null;
+                    }
                     first = null; // don't retain ref while waiting
-                    if (nanos < delay || leader != null)
+                    if (nanos < delay || leader != null) {
                         nanos = available.awaitNanos(nanos);
+                    }
                     else {
                         Thread thisThread = Thread.currentThread();
                         leader = thisThread;
@@ -279,18 +408,25 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
                             long timeLeft = available.awaitNanos(delay);
                             nanos -= delay - timeLeft;
                         } finally {
-                            if (leader == thisThread)
+                            if (leader == thisThread) {
                                 leader = null;
+                            }
                         }
                     }
                 }
             }
         } finally {
-            if (leader == null && q.peek() != null)
+            if (leader == null && q.peek() != null) {
                 available.signal();
+            }
             lock.unlock();
         }
     }
+
+
+    //---------------------------------------------------------------------
+    // 查看元素
+    //---------------------------------------------------------------------
 
     /**
      * Retrieves, but does not remove, the head of this queue, or
@@ -311,6 +447,14 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
             lock.unlock();
         }
     }
+
+
+
+
+    //---------------------------------------------------------------------
+    // 其他方法
+    //---------------------------------------------------------------------
+
 
     public int size() {
         final ReentrantLock lock = this.lock;

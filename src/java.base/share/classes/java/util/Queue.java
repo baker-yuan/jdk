@@ -136,6 +136,24 @@ package java.util;
  * @param <E> the type of elements held in this queue
  */
 public interface Queue<E> extends Collection<E> {
+
+    /**
+     *
+     * 头部 ...  尾部
+     *
+     * 一、尾部添加
+     * 1、add        抛异常
+     * 2、offer      返回特殊值
+     *
+     * 二、头部删除
+     * 1、remove     抛异常
+     * 2、poll       返回特殊值
+     *
+     * 三、检测头部元素（不删除）
+     * 1、element    抛异常
+     * 2、peek       返回特殊值
+     */
+
     /**
      * Inserts the specified element into this queue if it is possible to do so
      * immediately without violating capacity restrictions, returning
@@ -153,6 +171,7 @@ public interface Queue<E> extends Collection<E> {
      * @throws IllegalArgumentException if some property of this element
      *         prevents it from being added to this queue
      */
+    // 添加元素到队尾
     boolean add(E e);
 
     /**
@@ -172,6 +191,7 @@ public interface Queue<E> extends Collection<E> {
      * @throws IllegalArgumentException if some property of this element
      *         prevents it from being added to this queue
      */
+    //
     boolean offer(E e);
 
     /**

@@ -399,11 +399,12 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     // Hashtable不可以，他直接使用了hash=key.hashCode()，会触发空指针 java.util.Hashtable.addEntry
     static final int hash(Object key) {
         // 步骤
-        // 1、无符号位移(>>>)
-        // 2、按位异或(^)
-        // 3、按位与(&)
+        // 1、无符号位移(>>>) key的hashCode比较大，让高位参与计算
+        // 2、按位异或(^) 相同为0，相异为1
+        // 3、按位与(&) 得到下标
 
-        //h>>>16 >>>是无符号右移，是用来取出h的高16，让高位参与运算
+        // hashCode返回值是int，也就是32个比特位
+        // h>>>16 >>>是无符号右移，是用来取出h的高16，让高位参与运算
         int h; // 4字节 32位
 
         // 1）如果key等于null：
@@ -411,6 +412,23 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         // 2）如果key不等于null：
         // 	首先计算出key的hashCode（比较大）赋值给h，然后与h无符号右移16位后的二进制进行按位异或得到最后的hash值
 
+        // 1、得到hashCode
+        // 1111 1111 1111 1111 1111 0000 1110 1010 调用hashCode函数，h=key.hashCode()
+
+        // 2、无符号右移16位
+        // 0000 0000 0000 0000 1111 1111 1111 1111 无符号右移16位 h>>>16
+
+        // 3、异或运算
+        // 1111 1111 1111 1111 1111 0000 1110 1010 h
+        // 0000 0000 0000 0000 1111 1111 1111 1111 无符号右移16位 h>>>16
+        // ------------------------------------------------ (h ^ h>>>16)
+        // 1111 1111 1111 1111 0000 1111 0001 0101
+
+        // 4、计算下标(后续步骤，非本方法内)
+        // 1111 1111 1111 1111 0000 1111 0001 0101 得到的hash值
+        // 0000 0000 0000 0000 0000 0000 0000 1111 假设size为16，n-1的2进制就这样表示
+        // ------------------------------------------------ (n-1)&hash
+        // 0000 0000 0000 0000 0000 0000 0000 0101 得到下标5
         return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
     }
 
@@ -466,9 +484,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      */
     // ----------------------- cap=10 -----------------------
     //|（按位或运算）：运算规则：相同的二进制数位上，都是0的时候，结果为0，否则为1。
-    // cap=10
 
-    // n=9
+    // 入参：cap=10
+    // n=9 // int n = cap - 1;
     // n |= n>>> 1
     // 00000000 00000000 00000000 00001001 9 容量减一 cap-1
     // 00000000 00000000 00000000 00000100 4 无符号又移 n>>>1
@@ -506,11 +524,6 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         n |= n >>> 16;
         return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
     }
-
-
-
-
-
 
 
     /* ---------------- Fields -------------- */
@@ -1317,16 +1330,20 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
         public final void forEach(Consumer<? super K> action) {
             Node<K, V>[] tab;
-            if (action == null)
+            if (action == null) {
                 throw new NullPointerException();
+            }
             if (size > 0 && (tab = table) != null) {
                 int mc = modCount;
                 for (Node<K, V> e : tab) {
-                    for (; e != null; e = e.next)
+                    for (; e != null; e = e.next) {
                         action.accept(e.key);
+                    }
                 }
-                if (modCount != mc)
+                // 遍历的时候不能修改
+                if (modCount != mc) {
                     throw new ConcurrentModificationException();
+                }
             }
         }
     }

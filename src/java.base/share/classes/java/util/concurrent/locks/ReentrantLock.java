@@ -107,7 +107,10 @@ import jdk.internal.vm.annotation.ReservedStackAccess;
  */
 public class ReentrantLock implements Lock, java.io.Serializable {
     private static final long serialVersionUID = 7373984872572414699L;
-    /** Synchronizer providing all implementation mechanics */
+    
+    /** 
+     * Synchronizer providing all implementation mechanics 
+     */
     private final Sync sync;
 
     /**
@@ -313,6 +316,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      *
      * @throws InterruptedException if the current thread is interrupted
      */
+    // https://www.jianshu.com/p/a89f854b7db8
     public void lockInterruptibly() throws InterruptedException {
         sync.acquireInterruptibly(1);
     }

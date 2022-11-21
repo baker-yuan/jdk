@@ -104,17 +104,20 @@ public abstract class AbstractSelectableChannel
         int i = 0;
         if ((keys != null) && (keyCount < keys.length)) {
             // Find empty element of key array
-            for (i = 0; i < keys.length; i++)
-                if (keys[i] == null)
+            for (i = 0; i < keys.length; i++) {
+                if (keys[i] == null) {
                     break;
+                }
+            }
         } else if (keys == null) {
             keys = new SelectionKey[2];
         } else {
             // Grow key array
             int n = keys.length * 2;
             SelectionKey[] ks =  new SelectionKey[n];
-            for (i = 0; i < keys.length; i++)
+            for (i = 0; i < keys.length; i++) {
                 ks[i] = keys[i];
+            }
             keys = ks;
             i = keyCount;
         }
@@ -188,29 +191,37 @@ public abstract class AbstractSelectableChannel
      * </p>
      *
      * @throws  ClosedSelectorException {@inheritDoc}
-     *
      * @throws  IllegalBlockingModeException {@inheritDoc}
-     *
      * @throws  IllegalSelectorException {@inheritDoc}
-     *
      * @throws  CancelledKeyException {@inheritDoc}
-     *
      * @throws  IllegalArgumentException {@inheritDoc}
      */
-    public final SelectionKey register(Selector sel, int ops, Object att)
-        throws ClosedChannelException
-    {
-        if ((ops & ~validOps()) != 0)
+    /**
+     * 注册
+     * @param sel /
+     * @param ops /
+     * @param att attachment 附件
+     * @return /
+     * @throws ClosedChannelException /
+     */
+    public final SelectionKey register(Selector sel, int ops, Object att) throws ClosedChannelException {
+        if ((ops & ~validOps()) != 0) {
             throw new IllegalArgumentException();
-        if (!isOpen())
+        }
+
+        if (!isOpen()) {
             throw new ClosedChannelException();
+        }
+
         synchronized (regLock) {
-            if (isBlocking())
+            if (isBlocking()) {
                 throw new IllegalBlockingModeException();
+            }
             synchronized (keyLock) {
                 // re-check if channel has been closed
-                if (!isOpen())
+                if (!isOpen()) {
                     throw new ClosedChannelException();
+                }
                 SelectionKey k = findKey(sel);
                 if (k != null) {
                     k.attach(att);
@@ -218,6 +229,8 @@ public abstract class AbstractSelectableChannel
                 } else {
                     // New registration
                     k = ((AbstractSelector)sel).register(this, ops, att);
+
+                    // 放入集合中
                     addKey(k);
                 }
                 return k;

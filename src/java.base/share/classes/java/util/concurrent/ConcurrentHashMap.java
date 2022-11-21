@@ -1038,12 +1038,13 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
     }
 
     /**
+     * put和putIfAbsent的实现
      * Implementation for put and putIfAbsent
      */
     final V putVal(K key, V value, boolean onlyIfAbsent) {
         // key 和 value 都不允许为空
         if (key == null || value == null) {
-            // key不能为null，估计是作者不喜欢null为key的原因
+            // key不能为null(HashMap可以)，估计是作者不喜欢null为key的原因
             // value不能为null，
             throw new NullPointerException();
         }
@@ -1062,7 +1063,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 //容器为空进行初始化流程
                 tab = initTable();
             }
-            // 如果槽位为空
+            // 如果槽位为空(相应位置的Node还没有初始化)，调用CAS插入相应的数据
             else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
                 // 以cas方式进行替换，替换成功就中断循环，替换失败则进行下一次循环
                 if (casTabAt(tab, i, null, new Node<K,V>(hash, key, value))) {
@@ -1081,6 +1082,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 return fv;
             }
             // 如果槽位不为空，并且不是（forwarding节点）
+            // 如果相应位置的Node不为空，且当前该节点不处于移动状态，则对该节点加synchronized锁，如果该节点的hash不小于0，则遍历链表更新节点或插入新节点；
             else {
                 V oldVal = null;
                 synchronized (f) {
@@ -1108,6 +1110,10 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                             }
                         }
                         // 如果是红黑树
+                        // 如果该节点是TreeBin类型的节点，说明是红黑树结构，则通过putTreeVal方法往红黑树中插入节点；
+                        // 如果binCount不为0，说明put操作对数据产生了影响，如果当前链表的个数达到8个，
+                        // 则通过treeifyBin方法转化为红黑树，如果oldVal不为空，说明是一次更新操作，
+                        // 没有对元素个数产生影响，则直接返回旧值；
                         else if (f instanceof TreeBin) {
                             Node<K,V> p;
                             binCount = 2;
@@ -1137,7 +1143,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 }
             }
         }
-        //
+        // 如果插入的是一个新节点，则执行addCount()方法尝试更新元素个数baseCount；
         addCount(1L, binCount);
         return null;
     }

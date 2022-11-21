@@ -15,6 +15,10 @@ public class MapStudyTest {
     public static void main(String[] args) {
         System.out.println("hello jdk.");
         HashMap<String, Object> hm = new HashMap<>(200);
+
+
+        String a;
+
         // hm.put("1", "1");
         // Object oldValue = hm.put("1", "222");
 

@@ -11,8 +11,7 @@ public class ServiceProxy {
 
 
     /**
-     * -Djdk.proxy.debug=debug
-     * jdk.proxy.ProxyGenerator.saveGeneratedFiles
+     * -Djdk.proxy.debug=debug -Djdk.proxy.ProxyGenerator.saveGeneratedFiles=true
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
