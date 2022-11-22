@@ -88,7 +88,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 // https://www.jb51.net/article/219741.htm
 // 线程循环 + 优先队列
 public class Timer {
+
     /**
+     * 优先队列
+     *
      * The timer task queue.  This data structure is shared with the timer
      * thread.  The timer produces tasks, via its various schedule calls,
      * and the timer thread consumes, executing timer tasks as appropriate,
@@ -97,6 +100,8 @@ public class Timer {
     private final TaskQueue queue = new TaskQueue();
 
     /**
+     *
+     *
      * The timer thread.
      */
     private final TimerThread thread = new TimerThread(queue);
@@ -125,6 +130,11 @@ public class Timer {
     private static int serialNumber() {
         return nextSerialNumber.getAndIncrement();
     }
+
+
+
+
+
 
     /**
      * Creates a new timer.  The associated thread does <i>not</i>
