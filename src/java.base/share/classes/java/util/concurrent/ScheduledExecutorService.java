@@ -88,6 +88,12 @@ package java.util.concurrent;
  * @since 1.5
  * @author Doug Lea
  */
+
+/**
+ * ScheduledThreadPoolExecutor
+ *
+ * https://blog.csdn.net/ma15732625261/article/details/104355849/
+ */
 public interface ScheduledExecutorService extends ExecutorService {
 
     /**
@@ -108,7 +114,7 @@ public interface ScheduledExecutorService extends ExecutorService {
      * @param command 线程实现
      * @param delay 延迟时间
      * @param unit 单位
-     * @return
+     * @return /
      */
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit);
 
@@ -125,8 +131,7 @@ public interface ScheduledExecutorService extends ExecutorService {
      *         scheduled for execution
      * @throws NullPointerException if callable or unit is null
      */
-    public <V> ScheduledFuture<V> schedule(Callable<V> callable,
-                                           long delay, TimeUnit unit);
+    public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit);
 
     /**
      * Submits a periodic action that becomes enabled first after the
@@ -167,10 +172,7 @@ public interface ScheduledExecutorService extends ExecutorService {
      * @throws NullPointerException if command or unit is null
      * @throws IllegalArgumentException if period less than or equal to zero
      */
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
-                                                  long initialDelay,
-                                                  long period,
-                                                  TimeUnit unit);
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit);
 
     /**
      * Submits a periodic action that becomes enabled first after the
@@ -207,9 +209,6 @@ public interface ScheduledExecutorService extends ExecutorService {
      * @throws NullPointerException if command or unit is null
      * @throws IllegalArgumentException if delay less than or equal to zero
      */
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
-                                                     long initialDelay,
-                                                     long delay,
-                                                     TimeUnit unit);
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit);
 
 }

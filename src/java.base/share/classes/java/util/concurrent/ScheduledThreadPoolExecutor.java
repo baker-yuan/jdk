@@ -131,9 +131,24 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since 1.5
  * @author Doug Lea
  */
-public class ScheduledThreadPoolExecutor
-        extends ThreadPoolExecutor
-        implements ScheduledExecutorService {
+
+/**
+ * 我们知道，Java的定时调度可以通过Timer&TimerTask来实现。由于其实现的方式为单线程，因此从JDK1.3发布之后就一直存在一些问题，大致如下：
+ * 1、多个任务之间会相互影响
+ * 2、多个任务的执行是串行的，性能较低
+ * 3、ScheduledExecutorService在设计之初就是为了解决Timer&TimerTask的这些问题。因为天生就是基于多线程机制，所以任务之间不会相互影响（只要线程数足够。当线程数不足时，有些任务会复用同一个线程）。
+ *
+ * 除此之外，因为其内部使用的延迟队列，本身就是基于等待/唤醒机制实现的，所以CPU并不会一直繁忙。同时，多线程带来的CPU资源复用也能极大地提升性能。
+ *
+ * ScheduledExecutorService接口定义了四个方法:
+ * 1、schedule的两个方法，延时delay时间后执行任务。区别Callable参数可以获取任务完成的结果值，Runnable参数的不会得到结果值。
+ * 2、scheduleAtFixedRate方法：在延时initialDelay时间之后，开始第一次执行任务，然后每隔周期时间period，再次执行任务。注意如果任务消耗时间大于周期时间period，会等待任务完成之后，才再次执行任务。
+ * 3、scheduleWithFixedDelay方法：在延时initialDelay时间之后，开始第一次执行任务，任务执行完成之后，再延时delay时间，然后再次执行任务。
+ *
+ *
+ * https://blog.csdn.net/maoer95209520/article/details/107441037
+ */
+public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService {
 
     /*
      * This class specializes ThreadPoolExecutor implementation by
@@ -182,8 +197,11 @@ public class ScheduledThreadPoolExecutor
      */
     private static final AtomicLong sequencer = new AtomicLong();
 
-    private class ScheduledFutureTask<V>
-            extends FutureTask<V> implements RunnableScheduledFuture<V> {
+
+
+
+
+    private class ScheduledFutureTask<V> extends FutureTask<V> implements RunnableScheduledFuture<V> {
 
         /** Sequence number to break ties FIFO */
         private final long sequenceNumber;
@@ -210,8 +228,7 @@ public class ScheduledThreadPoolExecutor
         /**
          * Creates a one-shot action with given nanoTime-based trigger time.
          */
-        ScheduledFutureTask(Runnable r, V result, long triggerTime,
-                            long sequenceNumber) {
+        ScheduledFutureTask(Runnable r, V result, long triggerTime, long sequenceNumber) {
             super(r, result);
             this.time = triggerTime;
             this.period = 0;
@@ -222,8 +239,7 @@ public class ScheduledThreadPoolExecutor
          * Creates a periodic action with given nanoTime-based initial
          * trigger time and period.
          */
-        ScheduledFutureTask(Runnable r, V result, long triggerTime,
-                            long period, long sequenceNumber) {
+        ScheduledFutureTask(Runnable r, V result, long triggerTime, long period, long sequenceNumber) {
             super(r, result);
             this.time = triggerTime;
             this.period = period;
@@ -233,8 +249,7 @@ public class ScheduledThreadPoolExecutor
         /**
          * Creates a one-shot action with given nanoTime-based trigger time.
          */
-        ScheduledFutureTask(Callable<V> callable, long triggerTime,
-                            long sequenceNumber) {
+        ScheduledFutureTask(Callable<V> callable, long triggerTime, long sequenceNumber) {
             super(callable);
             this.time = triggerTime;
             this.period = 0;
@@ -309,6 +324,8 @@ public class ScheduledThreadPoolExecutor
         }
     }
 
+
+
     /**
      * Returns true if can run a task given current run state and
      * run-after-shutdown parameters.
@@ -336,14 +353,17 @@ public class ScheduledThreadPoolExecutor
      * @param task the task
      */
     private void delayedExecute(RunnableScheduledFuture<?> task) {
-        if (isShutdown())
+        if (isShutdown()) {
             reject(task);
+        }
         else {
             super.getQueue().add(task);
-            if (!canRunInCurrentRunState(task) && remove(task))
+            if (!canRunInCurrentRunState(task) && remove(task)) {
                 task.cancel(false);
-            else
+            }
+            else {
                 ensurePrestart();
+            }
         }
     }
 
@@ -404,8 +424,7 @@ public class ScheduledThreadPoolExecutor
      * @return a task that can execute the runnable
      * @since 1.6
      */
-    protected <V> RunnableScheduledFuture<V> decorateTask(
-        Runnable runnable, RunnableScheduledFuture<V> task) {
+    protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable, RunnableScheduledFuture<V> task) {
         return task;
     }
 
@@ -421,8 +440,7 @@ public class ScheduledThreadPoolExecutor
      * @return a task that can execute the callable
      * @since 1.6
      */
-    protected <V> RunnableScheduledFuture<V> decorateTask(
-        Callable<V> callable, RunnableScheduledFuture<V> task) {
+    protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable, RunnableScheduledFuture<V> task) {
         return task;
     }
 
@@ -442,6 +460,10 @@ public class ScheduledThreadPoolExecutor
      */
     private static final long DEFAULT_KEEPALIVE_MILLIS = 10L;
 
+
+
+
+
     /**
      * Creates a new {@code ScheduledThreadPoolExecutor} with the
      * given core pool size.
@@ -451,11 +473,8 @@ public class ScheduledThreadPoolExecutor
      * @throws IllegalArgumentException if {@code corePoolSize < 0}
      */
     public ScheduledThreadPoolExecutor(int corePoolSize) {
-        super(corePoolSize, Integer.MAX_VALUE,
-              DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,
-              new DelayedWorkQueue());
+        super(corePoolSize, Integer.MAX_VALUE, DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS, new DelayedWorkQueue());
     }
-
     /**
      * Creates a new {@code ScheduledThreadPoolExecutor} with the
      * given initial parameters.
@@ -467,13 +486,9 @@ public class ScheduledThreadPoolExecutor
      * @throws IllegalArgumentException if {@code corePoolSize < 0}
      * @throws NullPointerException if {@code threadFactory} is null
      */
-    public ScheduledThreadPoolExecutor(int corePoolSize,
-                                       ThreadFactory threadFactory) {
-        super(corePoolSize, Integer.MAX_VALUE,
-              DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,
-              new DelayedWorkQueue(), threadFactory);
+    public ScheduledThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory) {
+        super(corePoolSize, Integer.MAX_VALUE, DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS, new DelayedWorkQueue(), threadFactory);
     }
-
     /**
      * Creates a new {@code ScheduledThreadPoolExecutor} with the
      * given initial parameters.
@@ -485,13 +500,9 @@ public class ScheduledThreadPoolExecutor
      * @throws IllegalArgumentException if {@code corePoolSize < 0}
      * @throws NullPointerException if {@code handler} is null
      */
-    public ScheduledThreadPoolExecutor(int corePoolSize,
-                                       RejectedExecutionHandler handler) {
-        super(corePoolSize, Integer.MAX_VALUE,
-              DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,
-              new DelayedWorkQueue(), handler);
+    public ScheduledThreadPoolExecutor(int corePoolSize, RejectedExecutionHandler handler) {
+        super(corePoolSize, Integer.MAX_VALUE, DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS, new DelayedWorkQueue(), handler);
     }
-
     /**
      * Creates a new {@code ScheduledThreadPoolExecutor} with the
      * given initial parameters.
@@ -506,13 +517,17 @@ public class ScheduledThreadPoolExecutor
      * @throws NullPointerException if {@code threadFactory} or
      *         {@code handler} is null
      */
-    public ScheduledThreadPoolExecutor(int corePoolSize,
-                                       ThreadFactory threadFactory,
-                                       RejectedExecutionHandler handler) {
-        super(corePoolSize, Integer.MAX_VALUE,
-              DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,
-              new DelayedWorkQueue(), threadFactory, handler);
+    public ScheduledThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory, RejectedExecutionHandler handler) {
+        super(corePoolSize, Integer.MAX_VALUE, DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS, new DelayedWorkQueue(), threadFactory, handler);
     }
+
+
+
+
+
+
+
+
 
     /**
      * Returns the nanoTime-based trigger time of a delayed action.
@@ -525,8 +540,7 @@ public class ScheduledThreadPoolExecutor
      * Returns the nanoTime-based trigger time of a delayed action.
      */
     long triggerTime(long delay) {
-        return System.nanoTime() +
-            ((delay < (Long.MAX_VALUE >> 1)) ? delay : overflowFree(delay));
+        return System.nanoTime() + ((delay < (Long.MAX_VALUE >> 1)) ? delay : overflowFree(delay));
     }
 
     /**
@@ -546,41 +560,47 @@ public class ScheduledThreadPoolExecutor
         return delay;
     }
 
+
     /**
+     * 带延迟时间的调度，只执行一次
+     * 调度之后可通过Future.get()阻塞直至任务执行完毕
+     *
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    public ScheduledFuture<?> schedule(Runnable command,
-                                       long delay,
-                                       TimeUnit unit) {
-        if (command == null || unit == null)
+    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+        // 给定的延迟时间delay之后，才会执行任务command
+        if (command == null || unit == null) {
             throw new NullPointerException();
-        RunnableScheduledFuture<Void> t = decorateTask(command,
-            new ScheduledFutureTask<Void>(command, null,
-                                          triggerTime(delay, unit),
-                                          sequencer.getAndIncrement()));
+        }
+        RunnableScheduledFuture<Void> t = decorateTask(command, new ScheduledFutureTask<Void>(command, null, triggerTime(delay, unit), sequencer.getAndIncrement()));
         delayedExecute(t);
         return t;
     }
 
+
     /**
+     * 带延迟时间的调度，只执行一次
+     * 调度之后可通过Future.get()阻塞直至任务执行完毕，并且可以获取执行结果
+     *
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    public <V> ScheduledFuture<V> schedule(Callable<V> callable,
-                                           long delay,
-                                           TimeUnit unit) {
-        if (callable == null || unit == null)
+    public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+        // 给定的延迟时间delay之后，才会执行任务callable
+        if (callable == null || unit == null) {
             throw new NullPointerException();
-        RunnableScheduledFuture<V> t = decorateTask(callable,
-            new ScheduledFutureTask<V>(callable,
-                                       triggerTime(delay, unit),
-                                       sequencer.getAndIncrement()));
+        }
+        RunnableScheduledFuture<V> t = decorateTask(callable, new ScheduledFutureTask<V>(callable, triggerTime(delay, unit), sequencer.getAndIncrement()));
         delayedExecute(t);
         return t;
     }
 
+
+
     /**
+     * 带延迟时间的调度，循环执行，固定频率
+     *
      * Submits a periodic action that becomes enabled first after the
      * given initial delay, and subsequently with the given period;
      * that is, executions will commence after
@@ -613,14 +633,25 @@ public class ScheduledThreadPoolExecutor
      * @throws NullPointerException       {@inheritDoc}
      * @throws IllegalArgumentException   {@inheritDoc}
      */
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
-                                                  long initialDelay,
-                                                  long period,
-                                                  TimeUnit unit) {
-        if (command == null || unit == null)
+    /**
+     * 在给定的初始化延时initialDelay之后，固定频率地周期性执行任务command。
+     * 也就是说任务第一次运行时间是initialDelay，第二次运行时间是initialDelay+period，
+     * 第三次是initialDelay + period*2等等。 所以频率是相同地。
+     *
+     * 但是有一个问题，如果任务运行时间大于周期时间period该怎么办？
+     * 其实是这样的，在initialDelay之后开始运行任务，当任务完成之后，
+     * 将当前时间与initialDelay+period时间进行比较，如果小于initialDelay+period时间，那么等待，
+     * 如果大于initialDelay+period时间，那么就直接执行第二次任务
+     *
+     */
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+        // 该方法用于固定频率地对一个任务循环执行。
+        if (command == null || unit == null) {
             throw new NullPointerException();
-        if (period <= 0L)
+        }
+        if (period <= 0L) {
             throw new IllegalArgumentException();
+        }
         ScheduledFutureTask<Void> sft =
             new ScheduledFutureTask<Void>(command,
                                           null,
@@ -634,6 +665,8 @@ public class ScheduledThreadPoolExecutor
     }
 
     /**
+     * 带延迟时间的调度，循环执行，固定延迟
+     *
      * Submits a periodic action that becomes enabled first after the
      * given initial delay, and subsequently with the given delay
      * between the termination of one execution and the commencement of
@@ -661,14 +694,18 @@ public class ScheduledThreadPoolExecutor
      * @throws NullPointerException       {@inheritDoc}
      * @throws IllegalArgumentException   {@inheritDoc}
      */
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
-                                                     long initialDelay,
-                                                     long delay,
-                                                     TimeUnit unit) {
-        if (command == null || unit == null)
+    /**
+     * 在给定的初始化延时initialDelay之后，开始执行任务，任务执行完成之后，
+     * 等待delay时间，再一次执行任务。
+     * 因为它是等待任务完成之后，再进行延迟，就不会受任务完成时间长短地影响。
+     */
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+        if (command == null || unit == null) {
             throw new NullPointerException();
-        if (delay <= 0L)
+        }
+        if (delay <= 0L) {
             throw new IllegalArgumentException();
+        }
         ScheduledFutureTask<Void> sft =
             new ScheduledFutureTask<Void>(command,
                                           null,
@@ -680,6 +717,11 @@ public class ScheduledThreadPoolExecutor
         delayedExecute(t);
         return t;
     }
+
+
+
+
+
 
     /**
      * Executes {@code command} with zero required delay.
