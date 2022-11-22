@@ -85,6 +85,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @see     Object#wait(long)
  * @since   1.3
  */
+// https://www.jb51.net/article/219741.htm
 // 线程循环 + 优先队列
 public class Timer {
     /**
@@ -536,6 +537,7 @@ class TimerThread extends Thread {
     }
 
     /**
+     *
      * The main timer loop.  (See class comment.)
      */
     private void mainLoop() {
@@ -618,10 +620,15 @@ class TaskQueue {
      */
     void add(TimerTask task) {
         // Grow backing store if necessary
-        if (size + 1 == queue.length)
+        // 如果需要就扩容
+        if (size + 1 == queue.length) {
             queue = Arrays.copyOf(queue, 2*queue.length);
+        }
 
+        // 线加入最后一个
         queue[++size] = task;
+
+        // 排序
         fixUp(size);
     }
 
@@ -700,11 +707,15 @@ class TaskQueue {
      * nextExecutionTime is greater than or equal to that of its parent.
      */
     private void fixUp(int k) {
+        // 二分查找
         while (k > 1) {
             int j = k >> 1;
-            if (queue[j].nextExecutionTime <= queue[k].nextExecutionTime)
+            if (queue[j].nextExecutionTime <= queue[k].nextExecutionTime) {
                 break;
-            TimerTask tmp = queue[j];  queue[j] = queue[k]; queue[k] = tmp;
+            }
+            TimerTask tmp = queue[j];
+            queue[j] = queue[k];
+            queue[k] = tmp;
             k = j;
         }
     }
