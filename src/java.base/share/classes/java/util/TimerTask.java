@@ -37,40 +37,60 @@ package java.util;
  * @since   1.3
  */
 
+/**
+ * TimerTask是一个任务抽象类，实现了Runnable接口，是可被线程执行的。
+ */
 public abstract class TimerTask implements Runnable {
-    /**
-     * This object is used to control access to the TimerTask internals.
-     */
-    final Object lock = new Object();
 
+    //---------------------------------------------------------------------
+    // 成员变量
+    //---------------------------------------------------------------------
     /**
+     * 当一个TimerTask对象创建后，其初始状态为VIRGIN；
+     * 当调用Timer的schedule方法调度了此TimerTask对象后，其状态变更为SCHEDULED；
+     * 如果TimerTask是一次性任务，此任务执行后，状态将变为EXECUTED，可重复执行任务执行后状态不变；
+     * 当中途调用了TimerTask.cancel方法，该任务的状态将变为CANCELLED。
+     */
+    /**
+     * 任务状态，初始状态为待未调度状态
+     *
      * The state of this task, chosen from the constants below.
      */
     int state = VIRGIN;
-
     /**
+     * 未调度状态
+     *
      * This task has not yet been scheduled.
      */
     static final int VIRGIN = 0;
-
     /**
+     * 任务已调度，但未执行
+     * java.util.Timer#sched(java.util.TimerTask, long, long)
+     *
      * This task is scheduled for execution.  If it is a non-repeating task,
      * it has not yet been executed.
      */
-    static final int SCHEDULED   = 1;
-
+    static final int SCHEDULED = 1;
     /**
+     * 若是一次性任务表示已执行，可重复执行任务，该状态无效
+     *
      * This non-repeating task has already executed (or is currently
      * executing) and has not been cancelled.
      */
-    static final int EXECUTED    = 2;
-
+    static final int EXECUTED = 2;
     /**
+     * 任务被取消 cancel()
+     *
      * This task has been cancelled (with a call to TimerTask.cancel).
      */
-    static final int CANCELLED   = 3;
+    static final int CANCELLED = 3;
+
+
+
 
     /**
+     * 任务的下一次执行时间点
+     *
      * Next execution time for this task in the format returned by
      * System.currentTimeMillis, assuming this task is scheduled for execution.
      * For repeating tasks, this field is updated prior to each task execution.
@@ -78,11 +98,27 @@ public abstract class TimerTask implements Runnable {
     long nextExecutionTime;
 
     /**
+     * 任务执行的时间间隔。正数表示固定速率；负数表示固定时延；0表示只执行一次
+     *
      * Period in milliseconds for repeating tasks.  A positive value indicates
      * fixed-rate execution.  A negative value indicates fixed-delay execution.
      * A value of 0 indicates a non-repeating task.
      */
     long period = 0;
+
+
+    /**
+     * 用于加锁控制多线程修改TimerTask内部状态
+     *
+     * This object is used to control access to the TimerTask internals.
+     */
+    final Object lock = new Object();
+
+
+
+    //---------------------------------------------------------------------
+    // 构造函数
+    //---------------------------------------------------------------------
 
     /**
      * Creates a new timer task.
@@ -90,12 +126,22 @@ public abstract class TimerTask implements Runnable {
     protected TimerTask() {
     }
 
+
+
+    //---------------------------------------------------------------------
+    // 方法
+    //---------------------------------------------------------------------
+
     /**
+     * 实现了Runnable接口，创建TimerTask需要重写此方法，编写任务执行代码
+     *
      * The action to be performed by this timer task.
      */
     public abstract void run();
 
     /**
+     * 取消任务
+     *
      * Cancels this timer task.  If the task has been scheduled for one-time
      * execution and has not yet run, or has not yet been scheduled, it will
      * never run.  If the task has been scheduled for repeated execution, it
@@ -118,6 +164,9 @@ public abstract class TimerTask implements Runnable {
      *         executions from taking place.)
      */
     public boolean cancel() {
+        // 在cancel方法内，使用synchronized加锁，这是因为Timer内部的线程会对TimerTask状态进行修改，而调用cancel方法一般会是另外一个线程。
+        // 为了避免线程同步问题，cancel在修改状态前进行了加锁操作。
+        // 调用cancel方法将会把任务状态变更为CANCELLED状态，即任务取消状态，并返回一个布尔值，该布尔值表示此任务之前是否已是SCHEDULED 已调度状态。
         synchronized(lock) {
             boolean result = (state == SCHEDULED);
             state = CANCELLED;
@@ -126,6 +175,8 @@ public abstract class TimerTask implements Runnable {
     }
 
     /**
+     * 计算执行时间点
+     *
      * Returns the <i>scheduled</i> execution time of the most recent
      * <i>actual</i> execution of this task.  (If this method is invoked
      * while task execution is in progress, the return value is the scheduled
@@ -154,9 +205,20 @@ public abstract class TimerTask implements Runnable {
      * @see Date#getTime()
      */
     public long scheduledExecutionTime() {
+        // 该方法返回此任务的下次执行时间点。
         synchronized(lock) {
-            return (period < 0 ? nextExecutionTime + period
-                               : nextExecutionTime - period);
+            // period
+            // 1、正数表示固定速率
+            // 2、负数表示固定时延
+            // 3、0表示只执行一次
+            if (period < 0) {
+                return nextExecutionTime + period;
+            }
+            // >= 0
+            else {
+                nextExecutionTime - period;
+            }
+            // return (period < 0 ? nextExecutionTime + period : nextExecutionTime - period);
         }
     }
 }
