@@ -75,6 +75,25 @@ import java.util.function.Supplier;
  */
 
 /**
+ * 主要方法介绍
+ *
+ * T initialValue()：初始化
+ * 1、该方法会返回当前线程对应的“初始值”，这是一个延迟加载的方法，只有在调用get的时候，才会触发
+ * 2、当线程第一次使用get方法访问变量时，将调用此方法，除非线程先前调用了set方法，在这种情况下，不会为线程调用本initialValue方法
+ * 3、通常，每个线程最多调用一次此方法，但如果已经调用了remove()后，再调用get()，则可以再次调用此方法
+ * 4、如果不重写本方法，这个方法会返回null。一般使用匿名内部类的方法来重写initialValue()方法，以便在后续使用中可以初始化副本对象。
+ * 5、initialValue方法：是没有默认实现的，如果我们要用initialValue方法，需要自己实现，通常是匿名内部类的方式。
+ *
+ * void set(T t)：为这个线程设置一个新值
+ * 1、setInitialValue方法很类似
+ *
+ * T get()：得到这个线程对应的value。如果是首次调用get()，则会调用initialValue来得到这个值
+ * 1、get方法是先取出当前线程的ThreadLocalMap，然后调用map.getEntry方法，把本ThreadLocal的引用作为参数传入，取出map中属于本ThreadLocal的value
+ * 2、注意，这个map以及map中的key和value都是保存在线程中的，而不是保存在ThreadLocal中
+ *
+ * void remove()：删除对应这个线程的值
+ *
+ *
  * https://www.jianshu.com/p/acfd2239c9f4
  */
 public class ThreadLocal<T> {
@@ -109,7 +128,6 @@ public class ThreadLocal<T> {
      * Returns the next hash code.
      */
     private static int nextHashCode() {
-
         return nextHashCode.getAndAdd(HASH_INCREMENT);
     }
 
@@ -399,6 +417,15 @@ public class ThreadLocal<T> {
         throw new UnsupportedOperationException();
     }
 
+
+
+
+
+    //---------------------------------------------------------------------
+    // 内部类
+    //---------------------------------------------------------------------
+
+
     /**
      * An extension of ThreadLocal that obtains its initial value from
      * the specified {@code Supplier}.
@@ -416,6 +443,9 @@ public class ThreadLocal<T> {
             return supplier.get();
         }
     }
+
+
+
 
     /**
      * ThreadLocalMap is a customized hash map suitable only for
@@ -445,7 +475,9 @@ public class ThreadLocal<T> {
          * 因此这时候entry也可以从table中清除
          */
         static class Entry extends WeakReference<ThreadLocal<?>> {
-            /** The value associated with this ThreadLocal. */
+            /**
+             * The value associated with this ThreadLocal.
+             */
             Object value;
 
             Entry(ThreadLocal<?> k, Object v) {
@@ -455,28 +487,29 @@ public class ThreadLocal<T> {
         }
 
         /**
+         * 初始容量 - 必须是2的整数次幂
          * The initial capacity -- MUST be a power of two.
          */
-        // 初始容量 - 必须是2的整数次幂
         private static final int INITIAL_CAPACITY = 16;
 
         /**
+         * 存放数据的table，同样数组长度必须是2的整数次幂
+         *
          * The table, resized as necessary.
          * table.length MUST always be a power of two.
          */
-        // 存放数据的table，同样数组长度必须是2的整数次幂
         private Entry[] table;
 
         /**
+         * 数组里面entrys的个数，可以用于判断table当前使用量是否操作阈值
          * The number of entries in the table.
          */
-        // 数组里面entrys的个数，可以用于判断table当前使用量是否操作阈值
         private int size = 0;
 
         /**
+         * 进行扩容的阈值，表使用量大于它的时候进行扩容
          * The next size value at which to resize.
          */
-        // 进行扩容的阈值，表使用量大于它的时候进行扩容
         private int threshold; // Default to 0
 
         // 和HashMap类似，INITIAL_CAPACITY代表这个Map的初始容量，
@@ -587,10 +620,12 @@ public class ThreadLocal<T> {
         private Entry getEntry(ThreadLocal<?> key) {
             int i = key.threadLocalHashCode & (table.length - 1);
             Entry e = table[i];
-            if (e != null && e.get() == key)
+            if (e != null && e.get() == key) {
                 return e;
-            else
+            }
+            else {
                 return getEntryAfterMiss(key, i, e);
+            }
         }
 
         /**
