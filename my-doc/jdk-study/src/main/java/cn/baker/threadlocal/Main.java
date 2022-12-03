@@ -7,11 +7,38 @@ import java.util.HashMap;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
 
+    public static void main(String[] args) throws InterruptedException {
+        test1();
+        test2();
+        test3();
+        Thread currentThread = Thread.currentThread();
+        System.gc();
+        Thread.sleep(5000);
+
+        ThreadLocal<Object> threadLocal = new ThreadLocal<Object>();
+        threadLocal.set(new Apple("白苹果"));
+
+        System.out.println(currentThread);
+    }
+
+    public static void test1() {
+        ThreadLocal<Object> threadLocal = new ThreadLocal<Object>();
+        threadLocal.set(new Apple("黑苹果"));
+    }
+    public static void test2() {
+        ThreadLocal<Object> threadLocal = new ThreadLocal<Object>();
+        threadLocal.set(new Apple("红苹果"));
+    }
+    public static void test3() {
+        ThreadLocal<Object> threadLocal = new ThreadLocal<Object>();
+        threadLocal.set(new Apple("黄苹果"));
+    }
 
 
 
