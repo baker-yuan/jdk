@@ -413,7 +413,7 @@ public class Proxy implements java.io.Serializable {
             // 本质上是一个接口和 classloader 对应构造器的缓存，如果都没有就新建一个
             // ProxyBuilder 使用 classloader 和 ClassLoaderValue 的 key 创建一个 Proxy 并存入 CLassLoaderValue 里
             // clv 是 proxyCache，ld 是 classloader
-            //AbstractClassLoaderValue<ClassLoaderValue<Constructor<?>>, Constructor<?>>.Sub<? extends Class<?>> sub = proxyCache.sub(intf);
+            // AbstractClassLoaderValue<ClassLoaderValue<Constructor<?>>, Constructor<?>>.Sub<? extends Class<?>> sub = proxyCache.sub(intf);
 
             return proxyCache.sub(intf).computeIfAbsent(loader, (ld, clv) -> new ProxyBuilder(ld, clv.key()).build());
         } else {
@@ -423,7 +423,6 @@ public class Proxy implements java.io.Serializable {
                 checkProxyAccess(caller, loader, intfsArray);
             }
             final List<Class<?>> intfs = Arrays.asList(intfsArray);
-
             return proxyCache.sub(intfs).computeIfAbsent(loader, (ld, clv) -> new ProxyBuilder(ld, clv.key()).build());
         }
     }
@@ -634,6 +633,7 @@ public class Proxy implements java.io.Serializable {
         }
 
         /**
+         * ProxyBuilder
          *
          * @param loader 类加载器
          * @param intf 实现的接口
@@ -1012,14 +1012,13 @@ public class Proxy implements java.io.Serializable {
         Objects.requireNonNull(h);
         // null
         final Class<?> caller = System.getSecurityManager() == null ? null : Reflection.getCallerClass();
-
         /*
+         * 构造函数 !!! 重点
          * Look up or generate the designated proxy class and its constructor.
          */
-        // 构造函数
         Constructor<?> cons = getProxyConstructor(caller, loader, interfaces);
-
-        Object result =  newProxyInstance(caller, cons, h);
+        // new obj
+        Object result = newProxyInstance(caller, cons, h);
         return result;
     }
 

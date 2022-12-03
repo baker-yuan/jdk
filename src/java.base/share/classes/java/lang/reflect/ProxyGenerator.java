@@ -404,6 +404,8 @@ class ProxyGenerator {
      * @param accessFlags access flags of the proxy class
      */
     /**
+     * 生成代理对象
+     *
      * @param name        代理对象全路径名称
      * @param interfaces  代理对象实现到接口
      * @param accessFlags 代理对象访问标识符
