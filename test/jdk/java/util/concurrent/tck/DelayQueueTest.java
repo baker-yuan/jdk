@@ -54,7 +54,7 @@ public class DelayQueueTest extends JSR166TestCase {
 
     public static class Generic extends BlockingQueueTest {
         protected BlockingQueue emptyCollection() {
-            return new DelayQueue();
+            return new DelayQcueue();
         }
         protected PDelay makeElement(int i) {
             return new PDelay(i);
